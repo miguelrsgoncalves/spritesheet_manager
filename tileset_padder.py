@@ -22,6 +22,7 @@ class TilesetPadder(Extension):
 
         width = doc.width()
         height = doc.height()
+
         import os
         orig_path = doc.fileName()
         if orig_path:
@@ -38,40 +39,36 @@ class TilesetPadder(Extension):
 
         tile_size, padding, columns, rows, anti_bleed, name = result
 
-
-        color_model = doc.colorModel()
-        color_depth = doc.colorDepth()
-        profile = doc.colorProfile()
-        resolution = doc.resolution()
-
+        # Create new doc
         new_doc = app.createDocument(
-            doc.width(),
-            doc.height(),
+            width,
+            height,
             name,
-            color_model,
-            color_depth,
-            profile,
-            resolution
+            doc.colorModel(),
+            doc.colorDepth(),
+            doc.colorProfile(),
+            doc.resolution()
         )
 
         new_root = new_doc.rootNode()
         old_root = doc.rootNode()
 
+        # Remove auto-created layers
         for child in new_root.childNodes():
             new_root.removeChildNode(child)
 
-        for child in old_root.childNodes():
-            dup = child.clone()
-            new_root.addChildNode(dup, None)
+        # Clone all layers from original doc
+        cloned = old_root.clone()
+        new_root.addChildNode(cloned, None)
 
-
-        app.activeWindow().addView(new_doc)
         new_doc.refreshProjection()
+        app.activeWindow().addView(new_doc)
 
         if folder:
             save_path = os.path.join(folder, name + ".kra")
             new_doc.setFileName(save_path)
             new_doc.save()
+
 
     def openDialog(self, width, height, default_name):
         dlg = QDialog()
