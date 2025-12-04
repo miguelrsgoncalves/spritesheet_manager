@@ -19,13 +19,59 @@ class TilesetPadder(Extension):
     def run(self):
         app = Krita.instance()
         doc = app.activeDocument()
-        if doc is None:
-            return
 
         width = doc.width()
         height = doc.height()
 
-        self.openDialog(width, height)
+        result = self.openDialog(width, height)
+        if result is None:
+            return
+
+        tile_size, padding, columns, rows, anti_bleed = result
+
+        import os
+        orig_path = doc.fileName()
+        if orig_path:
+            folder = os.path.dirname(orig_path)
+            base = os.path.splitext(os.path.basename(orig_path))[0]
+            new_name = base + "_padded"
+        else:
+            folder = ""
+            new_name = doc.name() + "_padded"
+
+        color_model = doc.colorModel()
+        color_depth = doc.colorDepth()
+        profile = doc.colorProfile()
+        resolution = doc.resolution()
+
+        new_doc = app.createDocument(
+            doc.width(),
+            doc.height(),
+            new_name,
+            color_model,
+            color_depth,
+            profile,
+            resolution
+        )
+
+        new_root = new_doc.rootNode()
+        old_root = doc.rootNode()
+
+        for child in new_root.childNodes():
+            new_root.removeChildNode(child)
+
+        for child in old_root.childNodes():
+            dup = child.clone()
+            new_root.addChildNode(dup, None)
+
+
+        app.activeWindow().addView(new_doc)
+        new_doc.refreshProjection()
+
+        if folder:
+            save_path = os.path.join(folder, new_name + ".kra")
+            new_doc.setFileName(save_path)
+            new_doc.save()
 
     def openDialog(self, width, height):
         dlg = QDialog()
@@ -38,6 +84,7 @@ class TilesetPadder(Extension):
         tile_label = QLabel("Tile size")
         tile_size = QSpinBox()
         tile_size.setValue(64)
+        tile_size.setMaximum(999999)
         tile_row.addWidget(tile_label)
         tile_row.addWidget(tile_size)
         layout.addLayout(tile_row)
@@ -47,6 +94,7 @@ class TilesetPadder(Extension):
         padding_label = QLabel("Padding")
         padding = QSpinBox()
         padding.setValue(int(tile_size.value() / 8))
+        padding.setMaximum(999999)
         padding_row.addWidget(padding_label)
         padding_row.addWidget(padding)
         layout.addLayout(padding_row)
@@ -56,6 +104,7 @@ class TilesetPadder(Extension):
         columns_label = QLabel("Columns (Tiles X)")
         columns = QSpinBox()
         columns.setValue(int(width / tile_size.value()))
+        columns.setMaximum(999999)
         columns_row.addWidget(columns_label)
         columns_row.addWidget(columns)
         layout.addLayout(columns_row)
@@ -65,6 +114,7 @@ class TilesetPadder(Extension):
         rows_label = QLabel("Rows (Tiles Y)")
         rows = QSpinBox()
         rows.setValue(int(height / tile_size.value()))
+        rows.setMaximum(999999)
         rows_row.addWidget(rows_label)
         rows_row.addWidget(rows)
         layout.addLayout(rows_row)
@@ -79,12 +129,16 @@ class TilesetPadder(Extension):
             if not auto_update.isChecked():
                 return
 
-            tile_size = tile_size.value()
-            padding.setValue(max(0, int(tile_size / 8)))
-            columns.setValue(max(0, int(width / tile_size)))
-            rows.setValue(max(0, int(height / tile_size)))
+            padding.setValue(max(0, int(tile_size.value() / 8)))
+            columns.setValue(max(0, int(width / tile_size.value())))
+            rows.setValue(max(0, int(height / tile_size.value())))
 
         tile_size.valueChanged.connect(update_fields)
+
+        # Auto Update Checkbox
+        anti_pixeL_bleed_padding = QCheckBox("Add anti-pixel-bleed pixels to the padding")
+        anti_pixeL_bleed_padding.setChecked(True)
+        layout.addWidget(anti_pixeL_bleed_padding)
 
         # OK Button
         btn = QPushButton("OK")
@@ -92,7 +146,16 @@ class TilesetPadder(Extension):
         layout.addWidget(btn)
 
         dlg.setLayout(layout)
-        dlg.exec_()
+        if dlg.exec_() != QDialog.Accepted:
+            return None
+        else:
+            return (
+                tile_size.value(),
+                padding.value(),
+                columns.value(),
+                rows.value(),
+                anti_pixeL_bleed_padding.isChecked()
+            )
 
 
 Krita.instance().addExtension(TilesetPadder(Krita.instance()))
