@@ -1,3 +1,4 @@
+import os
 from krita import Krita, Extension
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
@@ -20,10 +21,12 @@ class TilesetPadder(Extension):
         app = Krita.instance()
         doc = app.activeDocument()
 
-        width = doc.width()
-        height = doc.height()
+        if not doc:
+            return
 
-        import os
+        orig_width = doc.width()
+        orig_height = doc.height()
+
         orig_path = doc.fileName()
         if orig_path:
             folder = os.path.dirname(orig_path)
@@ -33,16 +36,23 @@ class TilesetPadder(Extension):
             folder = ""
             new_name = doc.name() + "_padded"
 
-        result = self.openDialog(width, height, new_name)
+        result = self.openDialog(orig_width, orig_height, new_name)
         if result is None:
             return
 
         tile_size, padding, columns, rows, anti_bleed, name = result
 
-        # Create new doc
+        pixel_bytes = doc.pixelData(0, 0, orig_width, orig_height)
+
+        new_width = columns * (tile_size + (padding * 2))
+        new_height = rows * (tile_size + (padding * 2))
+        
+        if new_width == 0: new_width = orig_width
+        if new_height == 0: new_height = orig_height
+
         new_doc = app.createDocument(
-            width,
-            height,
+            new_width,
+            new_height,
             name,
             doc.colorModel(),
             doc.colorDepth(),
@@ -51,15 +61,13 @@ class TilesetPadder(Extension):
         )
 
         new_root = new_doc.rootNode()
-        old_root = doc.rootNode()
-
-        # Remove auto-created layers
         for child in new_root.childNodes():
             new_root.removeChildNode(child)
 
-        # Clone all layers from original doc
-        cloned = old_root.clone()
-        new_root.addChildNode(cloned, None)
+        new_layer = new_doc.createNode("Padded Tileset", "paintlayer")
+        new_root.addChildNode(new_layer, None)
+
+        new_layer.setPixelData(pixel_bytes, 0, 0, orig_width, orig_height)
 
         new_doc.refreshProjection()
         app.activeWindow().addView(new_doc)
@@ -68,7 +76,6 @@ class TilesetPadder(Extension):
             save_path = os.path.join(folder, name + ".kra")
             new_doc.setFileName(save_path)
             new_doc.save()
-
 
     def openDialog(self, width, height, default_name):
         dlg = QDialog()
@@ -100,7 +107,8 @@ class TilesetPadder(Extension):
         columns_row = QHBoxLayout()
         columns_label = QLabel("Columns (Tiles X)")
         columns = QSpinBox()
-        columns.setValue(int(width / tile_size.value()))
+        initial_cols = int(width / tile_size.value()) if tile_size.value() > 0 else 1
+        columns.setValue(initial_cols)
         columns.setMaximum(999999)
         columns_row.addWidget(columns_label)
         columns_row.addWidget(columns)
@@ -110,7 +118,8 @@ class TilesetPadder(Extension):
         rows_row = QHBoxLayout()
         rows_label = QLabel("Rows (Tiles Y)")
         rows = QSpinBox()
-        rows.setValue(int(height / tile_size.value()))
+        initial_rows = int(height / tile_size.value()) if tile_size.value() > 0 else 1
+        rows.setValue(initial_rows)
         rows.setMaximum(999999)
         rows_row.addWidget(rows_label)
         rows_row.addWidget(rows)
@@ -123,7 +132,7 @@ class TilesetPadder(Extension):
 
         # Auto update input values
         def update_fields():
-            if not auto_update.isChecked():
+            if not auto_update.isChecked() or tile_size.value() == 0:
                 return
 
             padding.setValue(max(0, int(tile_size.value() / 8)))
@@ -132,10 +141,10 @@ class TilesetPadder(Extension):
 
         tile_size.valueChanged.connect(update_fields)
 
-        # Auto Update Checkbox
-        anti_pixeL_bleed_padding = QCheckBox("Add anti-pixel-bleed pixels to the padding")
-        anti_pixeL_bleed_padding.setChecked(True)
-        layout.addWidget(anti_pixeL_bleed_padding)
+        # Anti-bleed Checkbox
+        anti_pixel_bleed_padding = QCheckBox("Add anti-pixel-bleed pixels to the padding")
+        anti_pixel_bleed_padding.setChecked(True)
+        layout.addWidget(anti_pixel_bleed_padding)
 
         name_row = QHBoxLayout()
         name_label = QLabel("Padded file name")
@@ -159,9 +168,8 @@ class TilesetPadder(Extension):
                 padding.value(),
                 columns.value(),
                 rows.value(),
-                anti_pixeL_bleed_padding.isChecked(),
+                anti_pixel_bleed_padding.isChecked(),
                 name.text()
             )
-
 
 Krita.instance().addExtension(TilesetPadder(Krita.instance()))
