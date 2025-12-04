@@ -1,7 +1,7 @@
 from krita import Krita, Extension
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QSpinBox, QCheckBox, QPushButton
+    QSpinBox, QCheckBox, QPushButton, QLineEdit
 )
 
 class TilesetPadder(Extension):
@@ -22,13 +22,6 @@ class TilesetPadder(Extension):
 
         width = doc.width()
         height = doc.height()
-
-        result = self.openDialog(width, height)
-        if result is None:
-            return
-
-        tile_size, padding, columns, rows, anti_bleed = result
-
         import os
         orig_path = doc.fileName()
         if orig_path:
@@ -39,6 +32,13 @@ class TilesetPadder(Extension):
             folder = ""
             new_name = doc.name() + "_padded"
 
+        result = self.openDialog(width, height, new_name)
+        if result is None:
+            return
+
+        tile_size, padding, columns, rows, anti_bleed, name = result
+
+
         color_model = doc.colorModel()
         color_depth = doc.colorDepth()
         profile = doc.colorProfile()
@@ -47,7 +47,7 @@ class TilesetPadder(Extension):
         new_doc = app.createDocument(
             doc.width(),
             doc.height(),
-            new_name,
+            name,
             color_model,
             color_depth,
             profile,
@@ -69,11 +69,11 @@ class TilesetPadder(Extension):
         new_doc.refreshProjection()
 
         if folder:
-            save_path = os.path.join(folder, new_name + ".kra")
+            save_path = os.path.join(folder, name + ".kra")
             new_doc.setFileName(save_path)
             new_doc.save()
 
-    def openDialog(self, width, height):
+    def openDialog(self, width, height, default_name):
         dlg = QDialog()
         dlg.setWindowTitle("Tileset Padder — Add padding to tileset")
 
@@ -140,6 +140,14 @@ class TilesetPadder(Extension):
         anti_pixeL_bleed_padding.setChecked(True)
         layout.addWidget(anti_pixeL_bleed_padding)
 
+        name_row = QHBoxLayout()
+        name_label = QLabel("Padded file name")
+        name = QLineEdit()
+        name.setText(default_name)
+        name_row.addWidget(name_label)
+        name_row.addWidget(name)
+        layout.addLayout(name_row)
+
         # OK Button
         btn = QPushButton("OK")
         btn.clicked.connect(dlg.accept)
@@ -154,7 +162,8 @@ class TilesetPadder(Extension):
                 padding.value(),
                 columns.value(),
                 rows.value(),
-                anti_pixeL_bleed_padding.isChecked()
+                anti_pixeL_bleed_padding.isChecked(),
+                name.text()
             )
 
 
