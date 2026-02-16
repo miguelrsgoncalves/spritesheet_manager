@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QSpinBox, QCheckBox, QPushButton, QLineEdit
 )
 
-class TilesetPadder(Extension):
+class SpriteSheetPadder(Extension):
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -14,7 +14,7 @@ class TilesetPadder(Extension):
         pass
 
     def createActions(self, window):
-        action = window.createAction("tileset_padder", "Add padding to tileset", "tools/scripts")
+        action = window.createAction("sprite_sheet_padder", "Add padding to Sprite Sheet", "tools/scripts")
         action.triggered.connect(self.run)
 
     def run(self):
@@ -63,7 +63,7 @@ class TilesetPadder(Extension):
         for child in new_root.childNodes():
             new_root.removeChildNode(child)
 
-        new_layer = new_doc.createNode("Padded Tileset", "paintlayer")
+        new_layer = new_doc.createNode("Padded Sprite Sheet", "paintlayer")
         new_root.addChildNode(new_layer, None)
 
         for row_index in range(rows_count):
@@ -135,7 +135,7 @@ class TilesetPadder(Extension):
 
     def openDialog(self, width, height, default_name):
         dlg = QDialog()
-        dlg.setWindowTitle("Tileset Padder — Add padding to tileset")
+        dlg.setWindowTitle("Sprite Sheet Padder — Add padding to Sprite Sheet")
 
         layout = QVBoxLayout()
 
@@ -228,4 +228,4 @@ class TilesetPadder(Extension):
                 name_input.text()
             )
 
-Krita.instance().addExtension(TilesetPadder(Krita.instance()))
+Krita.instance().addExtension(SpriteSheetPadder(Krita.instance()))

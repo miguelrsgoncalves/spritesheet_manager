@@ -1,6 +1,6 @@
-# Tileset Padder
+# Sprite Sheet Padder
 
-Add padding and anti-pixel-bleed pixels in Krita to any tileset.
+Add padding and anti-pixel-bleed pixels in Krita to any spritesheet.
 
 ## Installation
 

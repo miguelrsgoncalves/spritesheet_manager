@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Service
 ServiceTypes=Krita/PythonPlugin
-X-KDE-Library=tileset_padder
-X-Krita-Manual=tileset_padder_manual.html
-Name=Tileset Padder
+X-KDE-Library=sprite_sheet_padder
+X-Krita-Manual=sprite_sheet_padder_manual.html
+Name=Sprite Sheet Padder
 Comment=Automatically padds tiles in an atlas.
