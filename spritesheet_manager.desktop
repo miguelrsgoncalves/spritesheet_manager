@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=spritesheet_manager
+X-Krita-Manual=spritesheet_manager_manual.html
+Name=Spritesheet Manager
+Comment=A manager to everything Spritesheet related!

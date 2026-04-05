@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QSpinBox, QCheckBox, QPushButton, QLineEdit
 )
 
-class SpriteSheetPadder(Extension):
+class SpritesheetManager(Extension):
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -14,7 +14,7 @@ class SpriteSheetPadder(Extension):
         pass
 
     def createActions(self, window):
-        action = window.createAction("sprite_sheet_padder", "Add padding to Sprite Sheet", "tools/scripts")
+        action = window.createAction("spritesheet_manager", "Spritesheet Manager", "tools/scripts")
         action.triggered.connect(self.run)
 
     def run(self):
@@ -228,4 +228,4 @@ class SpriteSheetPadder(Extension):
                 name_input.text()
             )
 
-Krita.instance().addExtension(SpriteSheetPadder(Krita.instance()))
+Krita.instance().addExtension(SpritesheetManager(Krita.instance()))

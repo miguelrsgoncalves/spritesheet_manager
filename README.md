@@ -1,4 +1,4 @@
-# Sprite Sheet Padder
+# Spritesheet Manager
 
 Add padding and anti-pixel-bleed pixels in Krita to any spritesheet.
 
