@@ -1,13 +1,25 @@
 # Spritesheet Manager
 
-Add padding and anti-pixel-bleed pixels in Krita to any spritesheet.
+A Krita manager for everything Spritesheet related!
 
 ## Installation
 
-**Tools → Import Python plugin from file** and choose the .zip file that includes the plugin.
+**Tools → Scripts → Import Python Plugin from file**
+**Enable Spritesheet Manager and restart Krita**
+**The Spritesheet Manager menu will appear in the top menu bar**
 
-## Usage
-1. **Tools → Add padding to tileset**
-2. Fill in the correct values and inputs for the plugin to create the padded version.
-3. If you have the "Auto update input values" it will automatically fill the best values according to the tile size you choose.
-4. Enabling "Add anti-pixel-bleed pixels to the padding" will fill in the padding with copies of the border pixels, helping eliminating pixel bleed.
+##
+
+## Atlas Manager
+
+Not yet implemented. Will allow assembling multiple spritesheets into a single texture atlas with drag and drop layout, live links to source files, and per-tileset sub-grid organisation.
+
+## Spritesheet Editor
+
+Tools for working on individual spritesheet files.
+
+### Add Padding
+
+**Spritesheet Manager → Sheet Editor → Add Padding**
+
+Takes an existing spritesheet and produces a new one with configurable padding around every tile. Padding prevents texture bleeding in game engines that sample neighbouring pixels at tile edges during rendering.
