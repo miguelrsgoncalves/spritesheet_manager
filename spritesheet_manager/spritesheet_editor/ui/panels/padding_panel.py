@@ -64,13 +64,13 @@ class PaddingWidget(QWidget):
         self._link_button.setChecked(True)
         self._link_button.setFlat(True)
         self._link_button.setIcon(_load_link_icon(True))
-        self._link_button.setToolTip("Link width and height — both change together")
+        self._link_button.setToolTip("Link Width and Height")
         self._link_button.toggled.connect(self._on_link_toggled)
 
-        layout.addWidget(QLabel("W"))
+        layout.addWidget(QLabel("Width"))
         layout.addWidget(self._tile_width_spin)
         layout.addWidget(self._link_button)
-        layout.addWidget(QLabel("H"))
+        layout.addWidget(QLabel("Height"))
         layout.addWidget(self._tile_height_spin)
 
         group.setLayout(layout)
@@ -206,9 +206,9 @@ class PaddingWidget(QWidget):
         self._tile_size_linked = linked
         self._link_button.setIcon(_load_link_icon(linked))
         if linked:
-            self._link_button.setToolTip("Link width and height — both change together")
+            self._link_button.setToolTip("Link Width and Height")
         else:
-            self._link_button.setToolTip("Width and height are independent")
+            self._link_button.setToolTip("Unlink Width and Height")
 
     def _on_tile_width_changed(self, value: int):
         if self._tile_size_linked:
@@ -248,7 +248,7 @@ class PaddingDialog:
 
     def run(self):
         dialog = QDialog()
-        dialog.setWindowTitle("Add Padding — Spritesheet Editor")
+        dialog.setWindowTitle("Spritesheet Editor: Add Padding")
 
         layout = QVBoxLayout()
         layout.setSpacing(8)
