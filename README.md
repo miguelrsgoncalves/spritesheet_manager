@@ -5,10 +5,10 @@ A Krita manager for everything Spritesheet related!
 ## Installation
 
 **Tools → Scripts → Import Python Plugin from file**
-**Enable Spritesheet Manager and restart Krita**
-**The Spritesheet Manager menu will appear in the top menu bar**
 
-##
+**Enable Spritesheet Manager and restart Krita**
+
+**The Spritesheet Manager menu will appear in the top menu bar**
 
 ## Atlas Manager
 
