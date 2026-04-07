@@ -2,6 +2,6 @@
 Type=Service
 ServiceTypes=Krita/PythonPlugin
 X-KDE-Library=spritesheet_manager
-X-Krita-Manual=spritesheet_manager_manual.html
+X-Krita-Manual=manual.html
 Name=Spritesheet Manager
-Comment=A manager to everything Spritesheet related!
+Comment=A Krita manager for everything Spritesheet related!
