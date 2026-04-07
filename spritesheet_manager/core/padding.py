@@ -11,16 +11,6 @@ EXPORT_FILTERS = (
     "BMP Image (*.bmp)"
 )
 
-MIME_BY_EXTENSION = {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".webp": "image/webp",
-    ".tiff": "image/tiff",
-    ".tif": "image/tiff",
-    ".bmp": "image/bmp",
-}
-
 def create_padded_document(
     source_doc,
     tile_width: int,
@@ -110,7 +100,7 @@ def create_padded_document(
 def _export_with_dialog(doc, default_folder, default_name):
     default_path = os.path.join(default_folder, default_name + ".png") if default_folder else default_name + ".png"
 
-    export_path, selected_filter = QFileDialog.getSaveFileName(
+    export_path, _ = QFileDialog.getSaveFileName(
         None,
         "Export Spritesheet",
         default_path,
@@ -120,21 +110,7 @@ def _export_with_dialog(doc, default_folder, default_name):
     if not export_path:
         return
 
-    extension = os.path.splitext(export_path)[1].lower()
-    mime_type = MIME_BY_EXTENSION.get(extension, "image/png")
-
-    export_info = InfoObject()
-    export_info.setProperty("alpha", True)
-
-    # Set format-specific defaults
-    if mime_type == "image/jpeg":
-        export_info.setProperty("quality", 90)
-    elif mime_type == "image/png":
-        export_info.setProperty("compression", 6)
-    elif mime_type == "image/webp":
-        export_info.setProperty("quality", 90)
-
-    doc.export_image(export_path, export_info)
+    doc.exportImage(export_path, InfoObject())
 
 
 def _apply_anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y, tile_width, tile_height, padding_x, padding_y):
