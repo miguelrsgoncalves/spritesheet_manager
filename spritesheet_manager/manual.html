@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Spritesheet Manager Manual</title>
+    <style>
+        code {
+            background: #2a2a2a;
+            color: #ddd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Spritesheet Manager</h1>
+<p>A Krita manager for everything Spritesheet related!</p>
+
+<h2>Installation</h2>
+<ol>
+    <li><b>Tools → Scripts → Import Python Plugin from file</b>.</li>
+    <li>Enable <b>Spritesheet Manager</b> and restart Krita.</li>
+    <li>The <b>Spritesheet Manager</b> menu will appear in the top menu bar.</li>
+</ol>
+
+<h2>Atlas Manager</h2>
+<p>
+    Not yet implemented. Will allow assembling multiple spritesheets into a single texture atlas with drag and drop layout, live links to source files, and per-tileset sub-grid organisation.
+</p>
+
+<h2>Sheet Editor</h2>
+<p>Tools for working on individual spritesheet files.</p>
+
+<h3>Add Padding</h3>
+<p>
+    <b>Spritesheet Manager → Sheet Editor → Add Padding</b><br>
+    Takes an existing spritesheet and produces a new one with configurable padding around every tile. Padding prevents texture bleeding in game engines that sample neighbouring pixels at tile edges during rendering.
+</p>
+
+</body>
+</html>
