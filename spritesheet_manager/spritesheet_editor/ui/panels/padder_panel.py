@@ -2,23 +2,24 @@ import os
 from PyQt5.QtWidgets import (
     QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox,
-    QDialogButtonBox, QCommandLinkButton
+    QDialogButtonBox
 )
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
 
 def _load_link_icon(linked: bool):
-    return QIcon.fromTheme("insert-link") if linked else QIcon.fromTheme("insert-unlink")
+    return Krita.instance().icon("chain-linked") if linked else Krita.instance().icon("chain-unlinked")
 
 
-class PaddingWidget(QWidget):
+class PadderWidget(QWidget):
+    # Emitted when Apply is clicked in embedded/docker mode
     apply_requested = pyqtSignal(dict)
 
-    def __init__(self, doc_width: int = 0, doc_height: int = 0,
-                 default_name: str = "spritesheet_padded",
-                 show_apply_button: bool = False,
+    def __init__(self, doc_width=0, doc_height=0,
+                 default_name="spritesheet_padded",
+                 show_apply_button=False,
+                 saved_state=None,
                  parent=None):
-        
         super().__init__(parent)
         self._doc_width = doc_width
         self._doc_height = doc_height
@@ -42,8 +43,25 @@ class PaddingWidget(QWidget):
         root_layout.addStretch()
         self.setLayout(root_layout)
 
-        self._on_tile_size_changed()
-        self._update_auto_update_state(True)
+        # Apply saved state first, then recalc on top if auto-update is on
+        if saved_state:
+            self._apply_saved_state(saved_state)
+        else:
+            self._on_tile_size_changed()
+
+        self._update_auto_update_state(self._auto_update_checkbox.isChecked())
+
+    def _apply_saved_state(self, state):
+        # Restore previously saved settings for this document
+        self._tile_width_spin.setValue(state.get("tile_width", 64))
+        self._tile_height_spin.setValue(state.get("tile_height", 64))
+        self._padding_x_spin.setValue(state.get("padding_x", 8))
+        self._padding_y_spin.setValue(state.get("padding_y", 8))
+        self._columns_spin.setValue(state.get("columns", 1))
+        self._rows_spin.setValue(state.get("rows", 1))
+        self._anti_bleed_checkbox.setChecked(state.get("anti_bleed", True))
+        self._save_kra_checkbox.setChecked(state.get("save_kra", False))
+        self._export_image_checkbox.setChecked(state.get("export_image", True))
 
     def _build_tile_size_group(self):
         group = QGroupBox("Tile Size")
@@ -139,7 +157,7 @@ class PaddingWidget(QWidget):
         group.setLayout(layout)
         return group
 
-    def _build_output_group(self, default_name: str):
+    def _build_output_group(self, default_name):
         group = QGroupBox("Output")
         layout = QVBoxLayout()
         layout.setSpacing(6)
@@ -156,7 +174,6 @@ class PaddingWidget(QWidget):
         self._export_image_checkbox = QCheckBox("Export image")
         self._export_image_checkbox.setChecked(True)
 
-        # If save_kra is turned off force export on
         def _on_save_kra_toggled(checked):
             if not checked:
                 self._export_image_checkbox.setChecked(True)
@@ -172,12 +189,12 @@ class PaddingWidget(QWidget):
         group.setLayout(layout)
         return group
 
-    def set_doc_size(self, width: int, height: int):
+    def set_doc_size(self, width, height):
         self._doc_width = width
         self._doc_height = height
         self._on_tile_size_changed()
 
-    def set_default_name(self, name: str):
+    def set_default_name(self, name):
         self._name_input.setText(name)
 
     def get_values(self):
@@ -194,7 +211,8 @@ class PaddingWidget(QWidget):
             "export_image": self._export_image_checkbox.isChecked(),
         }
 
-    def _update_auto_update_state(self, auto_on: bool):
+    def _update_auto_update_state(self, auto_on):
+        # When auto-update is on, padding and grid fields are read-only
         self._padding_x_spin.setEnabled(not auto_on)
         self._padding_y_spin.setEnabled(not auto_on)
         self._columns_spin.setEnabled(not auto_on)
@@ -210,14 +228,14 @@ class PaddingWidget(QWidget):
         else:
             self._link_button.setToolTip("Unlink Width and Height")
 
-    def _on_tile_width_changed(self, value: int):
+    def _on_tile_width_changed(self, value):
         if self._tile_size_linked:
             self._tile_height_spin.blockSignals(True)
             self._tile_height_spin.setValue(value)
             self._tile_height_spin.blockSignals(False)
         self._on_tile_size_changed()
 
-    def _on_tile_height_changed(self, value: int):
+    def _on_tile_height_changed(self, value):
         if self._tile_size_linked:
             self._tile_width_spin.blockSignals(True)
             self._tile_width_spin.setValue(value)
@@ -240,24 +258,28 @@ class PaddingWidget(QWidget):
         self.apply_requested.emit(self.get_values())
 
 
-class PaddingDialog:
-    def __init__(self, doc_width: int, doc_height: int, default_name: str):
+class PadderDialog:
+    # Wraps PadderWidget in a standard dialog for use from the menu action
+
+    def __init__(self, doc_width, doc_height, default_name, saved_state=None):
         self._doc_width = doc_width
         self._doc_height = doc_height
         self._default_name = default_name
+        self._saved_state = saved_state
 
     def run(self):
         dialog = QDialog()
-        dialog.setWindowTitle("Spritesheet Editor: Add Padding")
+        dialog.setWindowTitle("Spritesheet Editor: Padder")
 
         layout = QVBoxLayout()
         layout.setSpacing(8)
 
-        widget = PaddingWidget(
+        widget = PadderWidget(
             doc_width=self._doc_width,
             doc_height=self._doc_height,
             default_name=self._default_name,
-            show_apply_button=False
+            show_apply_button=False,
+            saved_state=self._saved_state
         )
         layout.addWidget(widget)
 

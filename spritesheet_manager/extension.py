@@ -1,5 +1,6 @@
-from krita import Extension
+from krita import Extension, DockWidgetFactory, DockWidgetFactoryBase, Krita
 from .actions import register_actions
+from .atlas_editor.ui.atlas_docker import AtlasDocker
 
 class SpritesheetManagerExtension(Extension):
 
@@ -7,7 +8,13 @@ class SpritesheetManagerExtension(Extension):
         super().__init__(parent)
 
     def setup(self):
-        pass
+        Krita.instance().addDockWidgetFactory(
+            DockWidgetFactory(
+                "spritesheet_atlas_editor",
+                DockWidgetFactoryBase.DockRight,
+                AtlasDocker
+            )
+        )
 
     def createActions(self, window):
         register_actions(window)
