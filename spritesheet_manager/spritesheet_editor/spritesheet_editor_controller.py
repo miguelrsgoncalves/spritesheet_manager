@@ -1,7 +1,7 @@
 import os
 from krita import Krita
 from .core.padder import run_padder
-from ..core.serialization import get_padder_state, save_padder_state
+from .states.padder_state import load_padder_state, save_padder_state
 
 class SpritesheetEditorController:
 
@@ -20,14 +20,11 @@ class SpritesheetEditorController:
         else:
             default_name = doc.name() + "_padded"
 
-        # Load State
-        saved_state = get_padder_state(doc)
-
+        saved_state = load_padder_state(doc)
         result = PadderDialog(doc.width(), doc.height(), default_name, saved_state).run()
 
         if result is None: return
 
-        # Save State
         state_to_save = {k: v for k, v in result.items() if k != "name"}
         save_padder_state(doc, state_to_save)
 
@@ -36,10 +33,9 @@ class SpritesheetEditorController:
     def run_padder_from_widget(self, values):
         app = Krita.instance()
         doc = app.activeDocument()
-
+        
         if not doc: return
 
         state_to_save = {k: v for k, v in values.items() if k != "name"}
         save_padder_state(doc, state_to_save)
-
         run_padder(source_doc=doc, **values)

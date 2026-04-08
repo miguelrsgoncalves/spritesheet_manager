@@ -20,9 +20,9 @@ def register_actions(window):
 
     # Atlas Editor submenu
     atlas_menu = ssm_menu.addMenu("Atlas Editor")
-    open_atlas_action = QAction("Show Atlas Docker", main_window)
-    open_atlas_action.triggered.connect(lambda: _show_atlas_docker(window))
-    atlas_menu.addAction(open_atlas_action)
+    atlas_action = QAction("Show Atlas Docker", main_window)
+    atlas_action.triggered.connect(lambda: _show_atlas_docker(main_window))
+    atlas_menu.addAction(atlas_action)
 
     # Spritesheet Editor submenu
     editor_menu = ssm_menu.addMenu("Spritesheet Editor")
@@ -30,10 +30,10 @@ def register_actions(window):
     padding_action.triggered.connect(_get_editor_controller().run_padder_dialog)
     editor_menu.addAction(padding_action)
 
-def _show_atlas_docker(window):
-    docker = next(
-        (d for d in window.qwindow().findChildren(object) if hasattr(d, 'windowTitle') and d.windowTitle() == "Atlas Editor"),
-        None
-    )
-    if docker:
-        docker.setVisible(True)
+
+def _show_atlas_docker(main_window):
+    for docker in main_window.findChildren(object):
+        if hasattr(docker, "windowTitle") and docker.windowTitle() == "Atlas Editor":
+            docker.setVisible(True)
+            docker.raise_()
+            return
