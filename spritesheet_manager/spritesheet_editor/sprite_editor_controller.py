@@ -1,6 +1,6 @@
 import os
 from krita import Krita
-from ..core.padding import create_padded_document
+from ..core.padder import create_padded_document
 
 class EditorController:
 
@@ -10,7 +10,7 @@ class EditorController:
         if not doc:
             return
 
-        from .ui.panels.padding_panel import PaddingDialog
+        from .ui.panels.padder_panel import PaddingDialog
 
         original_path = doc.fileName()
         if original_path:

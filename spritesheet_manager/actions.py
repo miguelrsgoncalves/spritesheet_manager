@@ -1,6 +1,6 @@
 from krita import Krita
 from PyQt5.QtWidgets import QMenu, QAction
-from .spritesheet_editor.editor_controller import EditorController
+from .spritesheet_editor.sprite_editor_controller import EditorController
 
 _controller = None
 

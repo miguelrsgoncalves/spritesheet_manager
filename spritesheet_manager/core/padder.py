@@ -11,7 +11,7 @@ EXPORT_FILTERS = (
     "BMP Image (*.bmp)"
 )
 
-def create_padded_document(
+def run_padder(
     source_doc,
     tile_width: int,
     tile_height: int,
@@ -33,7 +33,7 @@ def create_padded_document(
     new_height = rows * stride_y
 
     # New document inherits colour settings from the source
-    new_doc = app.createDocument(
+    new_kra = app.createDocument(
         new_width, new_height, name,
         source_doc.colorModel(),
         source_doc.colorDepth(),
@@ -42,11 +42,11 @@ def create_padded_document(
     )
 
     # Remove the default blank layer Krita adds to every new document
-    root = new_doc.rootNode()
+    root = new_kra.rootNode()
     for child in root.childNodes():
         root.removeChildNode(child)
 
-    layer = new_doc.createNode("Padded Spritesheet", "paintlayer")
+    layer = new_kra.createNode("Padded Spritesheet", "paintlayer")
     root.addChildNode(layer, None)
 
     source_width = source_doc.width()
@@ -76,25 +76,27 @@ def create_padded_document(
                     padding_x, padding_y
                 )
 
-    new_doc.refreshProjection()
+    new_kra.refreshProjection()
 
     original_path = source_doc.fileName()
     folder = os.path.dirname(original_path) if original_path else ""
 
+    # Only open the document in Krita when keeping the .kra file
     if save_kra:
-        app.activeWindow().addView(new_doc)
+        app.activeWindow().addView(new_kra)
         if folder:
             kra_path = os.path.join(folder, name + ".kra")
-            new_doc.setFileName(kra_path)
-            new_doc.save()
+            new_kra.setFileName(kra_path)
+            new_kra.save()
 
     if export_image:
-        _export_with_dialog(new_doc, folder, name)
+        _export_with_dialog(new_kra, folder, name)
 
+    # If not keeping the .kra, close the temporary document
     if not save_kra:
-        new_doc.close()
+        new_kra.close()
 
-    return new_doc
+    return new_kra
 
 
 def _export_with_dialog(doc, default_folder, default_name):
@@ -113,16 +115,15 @@ def _export_with_dialog(doc, default_folder, default_name):
     doc.exportImage(export_path, InfoObject())
 
 
-def _apply_anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y, tile_width, tile_height, padding_x, padding_y):
+def _apply_anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
+                      tile_width, tile_height, padding_x, padding_y):
 
     # Top and bottom edge bands
     if padding_y > 0:
         top_row = read_pixels(source_doc, source_x, source_y, tile_width, 1)
         bottom_row = read_pixels(source_doc, source_x, source_y + tile_height - 1, tile_width, 1)
-        write_pixels(dest_layer, repeat_row_vertically(top_row, padding_y),
-                     dest_x, dest_y - padding_y, tile_width, padding_y)
-        write_pixels(dest_layer, repeat_row_vertically(bottom_row, padding_y),
-                     dest_x, dest_y + tile_height, tile_width, padding_y)
+        write_pixels(dest_layer, repeat_row_vertically(top_row, padding_y), dest_x, dest_y - padding_y, tile_width, padding_y)
+        write_pixels(dest_layer, repeat_row_vertically(bottom_row, padding_y), dest_x, dest_y + tile_height, tile_width, padding_y)
 
     # Left and right edge bands
     if padding_x > 0:
