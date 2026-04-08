@@ -24,19 +24,3 @@ def save_document_state(doc, state: dict):
         doc.setAnnotation(ANNOTATION_KEY, "Spritesheet Manager State", QByteArray(raw))
     except Exception:
         pass
-
-def get_padder_state(doc):
-    return load_document_state(doc).get("padder", {})
-
-def save_padder_state(doc, padder_state: dict):
-    state = load_document_state(doc)
-    state["padder"] = padder_state
-    save_document_state(doc, state)
-
-def get_atlas_state(doc):
-    return load_document_state(doc).get("atlas", {})
-
-def save_atlas_state(doc, atlas_state: dict):
-    state = load_document_state(doc)
-    state["atlas"] = atlas_state
-    save_document_state(doc, state)

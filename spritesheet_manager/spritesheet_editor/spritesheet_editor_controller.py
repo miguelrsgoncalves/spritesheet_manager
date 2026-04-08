@@ -1,6 +1,6 @@
 import os
 from krita import Krita
-from ..core.padder import run_padder
+from .core.padder import run_padder
 from ..core.serialization import get_padder_state, save_padder_state
 
 class SpritesheetEditorController:
