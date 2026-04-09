@@ -1,15 +1,6 @@
 import os
-from PyQt5.QtWidgets import (
-    QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox,
-    QDialogButtonBox
-)
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QIcon
-
-def _load_link_icon(linked: bool):
-    return Krita.instance().icon("chain-linked") if linked else Krita.instance().icon("chain-unlinked")
-
+from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
 
 class PadderWidget(QWidget):
     # Emitted when Apply is clicked in embedded/docker mode
@@ -259,28 +250,20 @@ class PadderWidget(QWidget):
 
 
 class PadderDialog:
-    # Wraps PadderWidget in a standard dialog for use from the menu action
-
-    def __init__(self, doc_width, doc_height, default_name, saved_state=None):
-        self._doc_width = doc_width
-        self._doc_height = doc_height
-        self._default_name = default_name
-        self._saved_state = saved_state
+    def __init__(self, document):
+        self._document = document
 
     def run(self):
         dialog = QDialog()
         dialog.setWindowTitle("Spritesheet Editor: Padder")
 
         layout = QVBoxLayout()
-        layout.setSpacing(8)
 
         widget = PadderWidget(
-            doc_width=self._doc_width,
-            doc_height=self._doc_height,
-            default_name=self._default_name,
-            show_apply_button=False,
-            saved_state=self._saved_state
+            document = self.document,
+            dialog = True,
         )
+
         layout.addWidget(widget)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
