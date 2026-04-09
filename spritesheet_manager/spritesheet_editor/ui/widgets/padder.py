@@ -1,35 +1,25 @@
-import os
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
 
 class PadderWidget(QWidget):
-    # Emitted when Apply is clicked in embedded/docker mode
-    apply_requested = pyqtSignal(dict)
+    accept_requested = pyqtSignal(dict)
 
-    def __init__(self, doc_width=0, doc_height=0,
-                 default_name="spritesheet_padded",
-                 show_apply_button=False,
-                 saved_state=None,
-                 parent=None):
-        super().__init__(parent)
-        self._doc_width = doc_width
-        self._doc_height = doc_height
+    def __init__(self, document):
+        super().__init__()
+
+        self._doc_width = document.width
+        self._doc_height = document.height
         self._tile_size_linked = True
 
         root_layout = QVBoxLayout()
-        root_layout.setContentsMargins(8, 8, 8, 8)
-        root_layout.setSpacing(8)
+        #root_layout.setContentsMargins(8, 8, 8, 8)
+        #root_layout.setSpacing(8)
 
         root_layout.addWidget(self._build_tile_size_group())
         root_layout.addWidget(self._build_padding_group())
         root_layout.addWidget(self._build_grid_group())
         root_layout.addWidget(self._build_options_group())
-        root_layout.addWidget(self._build_output_group(default_name))
-
-        if show_apply_button:
-            apply_button = QPushButton("Apply Padding")
-            apply_button.clicked.connect(self._on_apply)
-            root_layout.addWidget(apply_button)
+        root_layout.addWidget(self._build_output_group(document.name()))
 
         root_layout.addStretch()
         self.setLayout(root_layout)
@@ -246,8 +236,7 @@ class PadderWidget(QWidget):
         self._padding_y_spin.setValue(max(0, tile_height // 8))
 
     def _on_apply(self):
-        self.apply_requested.emit(self.get_values())
-
+        self.accept_requested.emit(self.get_values())
 
 class PadderDialog:
     def __init__(self, document):
@@ -261,7 +250,6 @@ class PadderDialog:
 
         widget = PadderWidget(
             document = self.document,
-            dialog = True,
         )
 
         layout.addWidget(widget)

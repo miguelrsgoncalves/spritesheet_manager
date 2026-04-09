@@ -12,7 +12,7 @@ EXPORT_FILTERS = (
 )
 
 def run_padder(
-    source_doc,
+    document,
     tile_width: int,
     tile_height: int,
     padding_x: int,
@@ -35,10 +35,10 @@ def run_padder(
     # New document inherits colour settings from the source
     new_kra = app.createDocument(
         new_width, new_height, name,
-        source_doc.colorModel(),
-        source_doc.colorDepth(),
-        source_doc.colorProfile(),
-        source_doc.resolution()
+        document.colorModel(),
+        document.colorDepth(),
+        document.colorProfile(),
+        document.resolution()
     )
 
     # Remove the default blank layer Krita adds to every new document
@@ -49,8 +49,8 @@ def run_padder(
     layer = new_kra.createNode("Padded Spritesheet", "paintlayer")
     root.addChildNode(layer, None)
 
-    source_width = source_doc.width()
-    source_height = source_doc.height()
+    source_width = document.width()
+    source_height = document.height()
 
     # Copy each tile from the source into its padded position in the new document
     for row in range(rows):
@@ -64,12 +64,12 @@ def run_padder(
             dest_x = (col * stride_x) + padding_x
             dest_y = (row * stride_y) + padding_y
 
-            tile_data = read_pixels(source_doc, source_x, source_y, tile_width, tile_height)
+            tile_data = read_pixels(document, source_x, source_y, tile_width, tile_height)
             write_pixels(layer, tile_data, dest_x, dest_y, tile_width, tile_height)
 
             if anti_bleed and (padding_x > 0 or padding_y > 0):
                 _apply_anti_bleed(
-                    source_doc, layer,
+                    document, layer,
                     source_x, source_y,
                     dest_x, dest_y,
                     tile_width, tile_height,
@@ -78,7 +78,7 @@ def run_padder(
 
     new_kra.refreshProjection()
 
-    original_path = source_doc.fileName()
+    original_path = document.fileName()
     folder = os.path.dirname(original_path) if original_path else ""
 
     # Only open the document in Krita when keeping the .kra file
