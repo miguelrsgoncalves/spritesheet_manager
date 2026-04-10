@@ -1,6 +1,10 @@
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.Qtile_widthidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
 from ....core.serializer import Serializer
+from ...core.padder import Padder
+
+# TODO: REVIEW ALL USAGE OF activeDocument on all files and classes
+# TODO: FINISH PADDER INTEGRATION
 
 WIDGET_KEY: str = "PADDER"
 WIDGET_DESCRIPTION: str = "Padder settings"
@@ -17,12 +21,8 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     accept_requested = pyqtSignal(dict)
 
-    _document_size: list[int]
-
-    def __init__(self, document):
+    def __init__(self):
         super().__init__()
-
-        self._document_size = [document.width(), document.height()]
 
         root_layout = QVBoxLayout()
 
@@ -30,13 +30,13 @@ class PadderWidget(QWidget):
         root_layout.addWidget(self._build_padding_widget())
         root_layout.addWidget(self._build_grid_widget())
         root_layout.addWidget(self._build_options_widget())
-        root_layout.addWidget(self._build_output_widget(document.name()))
+        root_layout.addWidget(self._build_output_widget())
 
         self.setLayout(root_layout)
 
     #region functions
 
-    def get_values(self):
+    def get_padder_arguments(self):
         return {
             "tile_width": self._tile_width_spin.value(),
             "tile_height": self._tile_height_spin.value(),
@@ -51,7 +51,6 @@ class PadderWidget(QWidget):
         }
 
     def _update_auto_update_state(self, auto_on):
-        # When auto-update is on, padding and grid fields are read-only
         self._padding_width_spin.setEnabled(not auto_on)
         self._padding_height_spin.setEnabled(not auto_on)
         self._columns_spin.setEnabled(not auto_on)
@@ -62,12 +61,17 @@ class PadderWidget(QWidget):
     def _on_tile_size_changed(self):
         if not self._auto_update_checkbox.isChecked():
             return
+            
         tile_width = self._tile_width_spin.value()
         tile_height = self._tile_height_spin.value()
-        if self._doc_width > 0:
-            self._columns_spin.setValue(max(1, self._doc_width // tile_width))
-        if self._doc_height > 0:
-            self._rows_spin.setValue(max(1, self._doc_height // tile_height))
+        
+        document_width, document_height = self._document_size
+        
+        if document_width > 0:
+            self._columns_spin.setValue(max(1, document_width // tile_width))
+        if document_height > 0:
+            self._rows_spin.setValue(max(1, document_height // tile_height))
+            
         self._padding_width_spin.setValue(max(0, tile_width // 8))
         self._padding_height_spin.setValue(max(0, tile_height // 8))
 
@@ -203,7 +207,7 @@ class PadderWidget(QWidget):
         self.set_state(state)
     
     def set_state(self, state):
-        tile_width, tile_height: int, int = state.get("tile_size", DEFAULTS["tile_size"])
+        tile_width, tile_height = state.get("tile_size", DEFAULTS["tile_size"])
         self._tile_width_spin.setValue(tile_width)
         self._tile_height_spin.setValue(tile_height)
 
@@ -211,9 +215,9 @@ class PadderWidget(QWidget):
         self._columns_spin.setValue(columns)
         self._rows_spin.setValue(rows)
 
-        pw, ph = state.get("padding_size", DEFAULTS["padding_size"])
-        self._padding_width_spin.setValue(pw)
-        self._padding_height_spin.setValue(ph)
+        padding_width, padding_height = state.get("padding_size", DEFAULTS["padding_size"])
+        self._padding_width_spin.setValue(padding_width)
+        self._padding_height_spin.setValue(padding_height)
 
         self._anti_bleed_checkbox.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
         self._save_kra_checkbox.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
@@ -240,18 +244,13 @@ class PadderWidget(QWidget):
     #endregion
 
 class PadderDialog:
-    def __init__(self, document):
-        self._document = document
-
-    def run(self) -> dict[str, any]:
+    def __init__(self):
         dialog = QDialog()
         dialog.setile_widthindowTitle("Spritesheet Editor: Padder")
 
         layout = QVBoxLayout()
 
-        widget = PadderWidget(
-            document = self.document,
-        )
+        widget = PadderWidget()
 
         layout.addWidget(widget)
 
@@ -266,4 +265,7 @@ class PadderDialog:
         if dialog.exec_() != QDialog.Accepted:
             return None
 
-        return widget.get_values()
+        return widget.get_padder_arguments()
+
+    def run_padder(padder_arguments: dict[str, any]):
+        Padder.run(padder_arguments)
