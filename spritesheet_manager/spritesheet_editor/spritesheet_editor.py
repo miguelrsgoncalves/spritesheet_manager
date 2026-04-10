@@ -8,7 +8,7 @@ def run_padder_dialog():
     document = krita.activeDocument()
     if not document: return
 
-    padder_arguments = PadderDialog(document).run()
+    padder_arguments: dict[str, any] = PadderDialog(document).run()
     if padder_arguments is None: return
 
-    run_padder(document=document, **padder_arguments)
+    run_padder(document = document, **padder_arguments)

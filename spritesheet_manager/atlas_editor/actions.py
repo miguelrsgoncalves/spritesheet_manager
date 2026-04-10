@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QAction
 
-def create_atlas_editor_actions(extension_instance, window, menu):
+def create_atlas_editor_actions(plugin_instance, window, menu):
     atlas_action = QAction("Show Atlas Docker", window)
     atlas_action.triggered.connect(lambda: _show_atlas_docker(window))
     menu.addAction(atlas_action)
