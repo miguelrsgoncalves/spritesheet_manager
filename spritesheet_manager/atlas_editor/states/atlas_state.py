@@ -1,6 +1,6 @@
-from ...core.serialization import load_document_state, save_document_state
+from ...core.serializer import load_document_state, save_document_state
 
-ATLAS_KEY = "atlas"
+ATLAS_KEY: str = "atlas"
 
 def load_atlas_state(doc):
     return load_document_state(doc).get(ATLAS_KEY, {})
