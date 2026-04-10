@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QMenu
 from .atlas_editor.actions import create_atlas_editor_actions
 from .spritesheet_editor.actions import create_spritesheet_editor_actions
 
+PLUGIN_VERSION: str = "1.0.0"
+
 class SpritesheetManagerExtension(Extension):
     def __init__(self, parent):
         super().__init__(parent)
