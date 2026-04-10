@@ -4,6 +4,7 @@ from ..spritesheet_manager import PLUGIN_VERSION
 import json
 
 PLUGIN_KEY: str = "SPRITESHEET_MANAGER"
+WIDGET_DESCRIPTION_PREFIX: str ="Spritesheet Manager: "
 
 class Serializer:
     @staticmethod
@@ -37,9 +38,10 @@ class Serializer:
         data["_version"] = PLUGIN_VERSION
         
         state_key: str = PLUGIN_KEY + "_" + key
+        state_description: str = WIDGET_DESCRIPTION_PREFIX + description
 
         try:
             raw_data: bytes = json.dumps(data).encode("utf-8")
-            document.setAnnotation(state_key, description, QByteArray(raw_data))
+            document.setAnnotation(state_key, state_description, QByteArray(raw_data))
         except Exception:
             pass

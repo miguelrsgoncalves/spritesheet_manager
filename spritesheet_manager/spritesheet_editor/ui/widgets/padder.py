@@ -1,53 +1,86 @@
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
+from PyQt5.Qtile_widthidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
+from ....core.serializer import Serializer
+
+WIDGET_KEY: str = "PADDER"
+WIDGET_DESCRIPTION: str = "Padder settings"
+
+DEFAULTS: dict[str, any] = {
+    "tile_size": [64, 64],
+    "grid_size": [1, 1],
+    "padding_size": [8, 8],
+    "anti_bleed": True,
+    "export_kra": False,
+    "export_image": True,
+}
 
 class PadderWidget(QWidget):
     accept_requested = pyqtSignal(dict)
 
+    _document_size: list[int]
+
     def __init__(self, document):
         super().__init__()
 
-        self._doc_width = document.width
-        self._doc_height = document.height
-        self._tile_size_linked = True
+        self._document_size = [document.width(), document.height()]
 
         root_layout = QVBoxLayout()
-        #root_layout.setContentsMargins(8, 8, 8, 8)
-        #root_layout.setSpacing(8)
 
-        root_layout.addWidget(self._build_tile_size_group())
-        root_layout.addWidget(self._build_padding_group())
-        root_layout.addWidget(self._build_grid_group())
-        root_layout.addWidget(self._build_options_group())
-        root_layout.addWidget(self._build_output_group(document.name()))
+        root_layout.addWidget(self._build_tile_size_widget())
+        root_layout.addWidget(self._build_padding_widget())
+        root_layout.addWidget(self._build_grid_widget())
+        root_layout.addWidget(self._build_options_widget())
+        root_layout.addWidget(self._build_output_widget(document.name()))
 
-        root_layout.addStretch()
         self.setLayout(root_layout)
 
-        # Apply saved state first, then recalc on top if auto-update is on
-        if saved_state:
-            self._apply_saved_state(saved_state)
-        else:
+    #region functions
+
+    def get_values(self):
+        return {
+            "tile_width": self._tile_width_spin.value(),
+            "tile_height": self._tile_height_spin.value(),
+            "padding_width": self._padding_width_spin.value(),
+            "padding_height": self._padding_height_spin.value(),
+            "columns": self._columns_spin.value(),
+            "rows": self._rows_spin.value(),
+            "anti_bleed": self._anti_bleed_checkbox.isChecked(),
+            "name": self._name_input.text(),
+            "save_kra": self._save_kra_checkbox.isChecked(),
+            "export_image": self._export_image_checkbox.isChecked(),
+        }
+
+    def _update_auto_update_state(self, auto_on):
+        # When auto-update is on, padding and grid fields are read-only
+        self._padding_width_spin.setEnabled(not auto_on)
+        self._padding_height_spin.setEnabled(not auto_on)
+        self._columns_spin.setEnabled(not auto_on)
+        self._rows_spin.setEnabled(not auto_on)
+        if auto_on:
             self._on_tile_size_changed()
 
-        self._update_auto_update_state(self._auto_update_checkbox.isChecked())
+    def _on_tile_size_changed(self):
+        if not self._auto_update_checkbox.isChecked():
+            return
+        tile_width = self._tile_width_spin.value()
+        tile_height = self._tile_height_spin.value()
+        if self._doc_width > 0:
+            self._columns_spin.setValue(max(1, self._doc_width // tile_width))
+        if self._doc_height > 0:
+            self._rows_spin.setValue(max(1, self._doc_height // tile_height))
+        self._padding_width_spin.setValue(max(0, tile_width // 8))
+        self._padding_height_spin.setValue(max(0, tile_height // 8))
 
-    def _apply_saved_state(self, state):
-        # Restore previously saved settings for this document
-        self._tile_width_spin.setValue(state.get("tile_width", 64))
-        self._tile_height_spin.setValue(state.get("tile_height", 64))
-        self._padding_x_spin.setValue(state.get("padding_x", 8))
-        self._padding_y_spin.setValue(state.get("padding_y", 8))
-        self._columns_spin.setValue(state.get("columns", 1))
-        self._rows_spin.setValue(state.get("rows", 1))
-        self._anti_bleed_checkbox.setChecked(state.get("anti_bleed", True))
-        self._save_kra_checkbox.setChecked(state.get("save_kra", False))
-        self._export_image_checkbox.setChecked(state.get("export_image", True))
+    def _on_apply(self):
+        self.accept_requested.emit(self.get_values())
+    
+    #endregion
 
-    def _build_tile_size_group(self):
-        group = QGroupBox("Tile Size")
+    #region widgets
+
+    def _build_tile_size_widget(self):
+        widget = QGroupBox("Tile Size")
         layout = QHBoxLayout()
-        layout.setSpacing(6)
 
         self._tile_width_spin = QSpinBox()
         self._tile_width_spin.setRange(1, 999999)
@@ -57,50 +90,38 @@ class PadderWidget(QWidget):
         self._tile_height_spin.setRange(1, 999999)
         self._tile_height_spin.setValue(64)
 
-        self._link_button = QPushButton()
-        self._link_button.setFixedSize(22, 22)
-        self._link_button.setCheckable(True)
-        self._link_button.setChecked(True)
-        self._link_button.setFlat(True)
-        self._link_button.setIcon(_load_link_icon(True))
-        self._link_button.setToolTip("Link Width and Height")
-        self._link_button.toggled.connect(self._on_link_toggled)
-
         layout.addWidget(QLabel("Width"))
         layout.addWidget(self._tile_width_spin)
         layout.addWidget(self._link_button)
         layout.addWidget(QLabel("Height"))
         layout.addWidget(self._tile_height_spin)
 
-        group.setLayout(layout)
+        widget.setLayout(layout)
 
-        self._tile_width_spin.valueChanged.connect(self._on_tile_width_changed)
-        self._tile_height_spin.valueChanged.connect(self._on_tile_height_changed)
+        return widget
 
-        return group
-
-    def _build_padding_group(self):
+    def _build_padding_widget(self):
         group = QGroupBox("Padding")
         layout = QHBoxLayout()
         layout.setSpacing(6)
 
-        self._padding_x_spin = QSpinBox()
-        self._padding_x_spin.setRange(0, 999999)
-        self._padding_x_spin.setValue(8)
+        self._padding_width_spin = QSpinBox()
+        self._padding_width_spin.setRange(0, 999999)
+        self._padding_width_spin.setValue(8)
 
-        self._padding_y_spin = QSpinBox()
-        self._padding_y_spin.setRange(0, 999999)
-        self._padding_y_spin.setValue(8)
+        self._padding_height_spin = QSpinBox()
+        self._padding_height_spin.setRange(0, 999999)
+        self._padding_height_spin.setValue(8)
 
         layout.addWidget(QLabel("Horizontal"))
-        layout.addWidget(self._padding_x_spin)
+        layout.addWidget(self._padding_width_spin)
         layout.addWidget(QLabel("Vertical"))
-        layout.addWidget(self._padding_y_spin)
+        layout.addWidget(self._padding_height_spin)
 
         group.setLayout(layout)
         return group
 
-    def _build_grid_group(self):
+    def _build_grid_widget(self):
         group = QGroupBox("Grid")
         layout = QVBoxLayout()
         layout.setSpacing(6)
@@ -124,7 +145,7 @@ class PadderWidget(QWidget):
         group.setLayout(layout)
         return group
 
-    def _build_options_group(self):
+    def _build_options_widget(self):
         group = QGroupBox("Options")
         layout = QVBoxLayout()
 
@@ -138,7 +159,7 @@ class PadderWidget(QWidget):
         group.setLayout(layout)
         return group
 
-    def _build_output_group(self, default_name):
+    def _build_output_widget(self, default_name):
         group = QGroupBox("Output")
         layout = QVBoxLayout()
         layout.setSpacing(6)
@@ -170,81 +191,61 @@ class PadderWidget(QWidget):
         group.setLayout(layout)
         return group
 
-    def set_doc_size(self, width, height):
-        self._doc_width = width
-        self._doc_height = height
-        self._on_tile_size_changed()
+    #endregion
 
-    def set_default_name(self, name):
-        self._name_input.setText(name)
+    #region state
 
-    def get_values(self):
+    def load_state(self):
+        krita = Krita.instance()
+        document = krita.activeDocument()
+
+        state: dict[str, any] = Serializer.load_state(document, WIDGET_KEY)
+        self.set_state(state)
+    
+    def set_state(self, state):
+        tile_width, tile_height: int, int = state.get("tile_size", DEFAULTS["tile_size"])
+        self._tile_width_spin.setValue(tile_width)
+        self._tile_height_spin.setValue(tile_height)
+
+        columns, rows = state.get("grid_size", DEFAULTS["grid_size"])
+        self._columns_spin.setValue(columns)
+        self._rows_spin.setValue(rows)
+
+        pw, ph = state.get("padding_size", DEFAULTS["padding_size"])
+        self._padding_width_spin.setValue(pw)
+        self._padding_height_spin.setValue(ph)
+
+        self._anti_bleed_checkbox.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
+        self._save_kra_checkbox.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
+        self._export_image_checkbox.setChecked(state.get("export_image", DEFAULTS["export_image"]))
+
+    def save_state(self):
+        krita = Krita.instance()
+        document = krita.activeDocument()
+
+        data: dict[str, any] = self.get_state()
+        Serializer.save_state(document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
+    
+    def get_state(self) -> dict[str, any]:
         return {
-            "tile_width": self._tile_width_spin.value(),
-            "tile_height": self._tile_height_spin.value(),
-            "padding_x": self._padding_x_spin.value(),
-            "padding_y": self._padding_y_spin.value(),
-            "columns": self._columns_spin.value(),
-            "rows": self._rows_spin.value(),
+            "tile_size": [self._tile_width_spin.value(), self._tile_height_spin.value()],
+            "grid_size": [self._columns_spin.value(), self._rows_spin.value()],
+            "padding_size": [self._padding_width_spin.value(), self._padding_height_spin.value()],
+            
             "anti_bleed": self._anti_bleed_checkbox.isChecked(),
-            "name": self._name_input.text(),
-            "save_kra": self._save_kra_checkbox.isChecked(),
+            "export_kra": self._save_kra_checkbox.isChecked(),
             "export_image": self._export_image_checkbox.isChecked(),
         }
-
-    def _update_auto_update_state(self, auto_on):
-        # When auto-update is on, padding and grid fields are read-only
-        self._padding_x_spin.setEnabled(not auto_on)
-        self._padding_y_spin.setEnabled(not auto_on)
-        self._columns_spin.setEnabled(not auto_on)
-        self._rows_spin.setEnabled(not auto_on)
-        if auto_on:
-            self._on_tile_size_changed()
-
-    def _on_link_toggled(self, linked: bool):
-        self._tile_size_linked = linked
-        self._link_button.setIcon(_load_link_icon(linked))
-        if linked:
-            self._link_button.setToolTip("Link Width and Height")
-        else:
-            self._link_button.setToolTip("Unlink Width and Height")
-
-    def _on_tile_width_changed(self, value):
-        if self._tile_size_linked:
-            self._tile_height_spin.blockSignals(True)
-            self._tile_height_spin.setValue(value)
-            self._tile_height_spin.blockSignals(False)
-        self._on_tile_size_changed()
-
-    def _on_tile_height_changed(self, value):
-        if self._tile_size_linked:
-            self._tile_width_spin.blockSignals(True)
-            self._tile_width_spin.setValue(value)
-            self._tile_width_spin.blockSignals(False)
-        self._on_tile_size_changed()
-
-    def _on_tile_size_changed(self):
-        if not self._auto_update_checkbox.isChecked():
-            return
-        tile_width = self._tile_width_spin.value()
-        tile_height = self._tile_height_spin.value()
-        if self._doc_width > 0:
-            self._columns_spin.setValue(max(1, self._doc_width // tile_width))
-        if self._doc_height > 0:
-            self._rows_spin.setValue(max(1, self._doc_height // tile_height))
-        self._padding_x_spin.setValue(max(0, tile_width // 8))
-        self._padding_y_spin.setValue(max(0, tile_height // 8))
-
-    def _on_apply(self):
-        self.accept_requested.emit(self.get_values())
+    
+    #endregion
 
 class PadderDialog:
     def __init__(self, document):
         self._document = document
 
-    def run(self):
+    def run(self) -> dict[str, any]:
         dialog = QDialog()
-        dialog.setWindowTitle("Spritesheet Editor: Padder")
+        dialog.setile_widthindowTitle("Spritesheet Editor: Padder")
 
         layout = QVBoxLayout()
 
