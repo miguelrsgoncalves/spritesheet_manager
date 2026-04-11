@@ -1,3 +1,4 @@
+from krita import Krita
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
 from ....core.serializer import Serializer
@@ -21,8 +22,10 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     accept_requested = pyqtSignal(dict)
 
+
     def __init__(self):
         super().__init__()
+        self.document: any = Krita.instance().activeDocument()
 
         root_layout = QVBoxLayout()
 
@@ -34,19 +37,18 @@ class PadderWidget(QWidget):
 
         self.setLayout(root_layout)
 
+        self.setup_signals(self)
+
     #region functions
 
     def get_padder_arguments(self):
         return {
-            "tile_width": self._tile_width_spin.value(),
-            "tile_height": self._tile_height_spin.value(),
-            "padding_width": self._padding_width_spin.value(),
-            "padding_height": self._padding_height_spin.value(),
-            "columns": self._columns_spin.value(),
-            "rows": self._rows_spin.value(),
+            "tile_size": [self._tile_width_spin.value(), self._tile_height_spin.value()],
+            "grid_size": [self._columns_spin.value(), self._rows_spin.value()],
+            "padding_size": [self._padding_width_spin.value(), self._padding_height_spin.value()],
             "anti_bleed": self._anti_bleed_checkbox.isChecked(),
             "name": self._name_input.text(),
-            "save_kra": self._save_kra_checkbox.isChecked(),
+            "export_kra": self._save_kra_checkbox.isChecked(),
             "export_image": self._export_image_checkbox.isChecked(),
         }
 
@@ -243,6 +245,26 @@ class PadderWidget(QWidget):
     
     #endregion
 
+    #region signals
+
+    def setup_signals(self):
+        notifier = Krita.instance().notifier()
+        notifier.activeCanvasChanged.connect(self.on_active_canvas_changed)
+
+    def on_active_canvas_changed(self):
+        self.document = Krita.instance().activeDocument()
+        self.load_state()
+
+    #endregion
+
+    def closeEvent(self, a0):
+        try:
+            notifier = Krita.instance().notifier()
+            notifier.activeCanvasChanged.disconnect(self.on_active_canvas_changed)
+        except:
+            pass
+        return super().closeEvent(a0)
+
 class PadderDialog:
     def __init__(self):
         dialog = QDialog()
@@ -262,10 +284,9 @@ class PadderDialog:
 
         dialog.setLayout(layout)
 
-        if dialog.exec_() != QDialog.Accepted:
-            return None
+        if dialog.exec_() != QDialog.Accepted: return None
 
-        return widget.get_padder_arguments()
+        self.run_padder(widget.get_padder_arguments())
 
     def run_padder(padder_arguments: dict[str, any]):
         Padder.run(padder_arguments)
