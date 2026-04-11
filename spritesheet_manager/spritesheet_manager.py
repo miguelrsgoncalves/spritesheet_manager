@@ -1,5 +1,5 @@
 from krita import Extension
-from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMainWindow, QMenu
 from .atlas_editor.actions import create_atlas_editor_actions
 from .spritesheet_editor.actions import create_spritesheet_editor_actions
 
@@ -11,9 +11,11 @@ class SpritesheetManagerExtension(Extension):
         pass
 
     def createActions(self, window):
+        main_window: QMainWindow = window.qwindow()
+
         # Spritesheet Manager menu
-        spritesheet_manager_menu: QMenu = QMenu("Spritesheet Manager", window)
-        window.menuBar().addMenu(spritesheet_manager_menu)
+        spritesheet_manager_menu: QMenu = QMenu("Spritesheet Manager", main_window)
+        main_window.menuBar().addMenu(spritesheet_manager_menu)
 
         # Atlas Editor submenu
         #atlas_editor_submenu: QMenu = spritesheet_manager_menu.addMenu("Atlas Editor")
