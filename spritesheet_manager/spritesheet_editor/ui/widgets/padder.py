@@ -37,7 +37,8 @@ class PadderWidget(QWidget):
 
         self.setLayout(root_layout)
 
-        self.setup_signals(self)
+        notifier = Krita.instance().notifier()
+        notifier.activeCanvasChanged.connect(self.on_active_canvas_changed)
 
     #region functions
 
@@ -246,10 +247,6 @@ class PadderWidget(QWidget):
     #endregion
 
     #region signals
-
-    def setup_signals(self):
-        notifier = Krita.instance().notifier()
-        notifier.activeCanvasChanged.connect(self.on_active_canvas_changed)
 
     def on_active_canvas_changed(self):
         self.document = Krita.instance().activeDocument()
