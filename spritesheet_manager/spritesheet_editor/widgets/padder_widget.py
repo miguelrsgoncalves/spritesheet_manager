@@ -264,7 +264,7 @@ class PadderWidget(QWidget):
 class PadderDialog:
     def __init__(self):
         dialog: QDialog = QDialog()
-        dialog.setile_widthindowTitle("Spritesheet Editor: Padder")
+        dialog.setWindowTitle("Spritesheet Editor: Padder")
 
         layout: QVBoxLayout = QVBoxLayout()
 
