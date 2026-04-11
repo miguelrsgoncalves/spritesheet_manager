@@ -36,9 +36,6 @@ class PadderWidget(QWidget):
 
         self.setLayout(root_layout)
 
-        notifier = Krita.instance().notifier()
-        notifier.activeCanvasChanged.connect(self.on_active_canvas_changed)
-
     #region functions
 
     def get_padder_arguments(self):
@@ -269,9 +266,9 @@ class PadderDialog:
         layout: QVBoxLayout = QVBoxLayout()
 
         document: any = Krita.instance().activeDocument()
-        widget: PadderWidget = PadderWidget(self, document)
+        padder_widget: PadderWidget = PadderWidget(self, document)
 
-        layout.addWidget(widget)
+        layout.addWidget(padder_widget)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.button(QDialogButtonBox.Ok).setText("Apply Padding")
@@ -283,7 +280,7 @@ class PadderDialog:
 
         if dialog.exec_() != QDialog.Accepted: return None
 
-        self.run_padder(widget.get_padder_arguments())
+        self.run_padder(padder_widget.get_padder_arguments())
 
     def run_padder(padder_arguments: dict[str, any]):
         Padder.run(padder_arguments)
