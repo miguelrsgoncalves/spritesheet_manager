@@ -22,12 +22,11 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     accept_requested = pyqtSignal(dict)
 
-
-    def __init__(self):
+    def __init__(self, document):
         super().__init__()
-        self.document: any = Krita.instance().activeDocument()
+        self.document: any = document
 
-        root_layout = QVBoxLayout()
+        root_layout: QVBoxLayout = QVBoxLayout()
 
         root_layout.addWidget(self._build_tile_size_widget())
         root_layout.addWidget(self._build_padding_widget())
@@ -264,12 +263,13 @@ class PadderWidget(QWidget):
 
 class PadderDialog:
     def __init__(self):
-        dialog = QDialog()
+        dialog: QDialog = QDialog()
         dialog.setile_widthindowTitle("Spritesheet Editor: Padder")
 
-        layout = QVBoxLayout()
+        layout: QVBoxLayout = QVBoxLayout()
 
-        widget = PadderWidget()
+        document: any = Krita.instance().activeDocument()
+        widget: PadderWidget = PadderWidget(self, document)
 
         layout.addWidget(widget)
 
