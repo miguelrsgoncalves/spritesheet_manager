@@ -1,6 +1,6 @@
 from krita import Krita
 from PyQt5.QtCore import QByteArray
-from ..spritesheet_manager import PLUGIN_VERSION
+from ..version import PLUGIN_VERSION
 import json
 
 PLUGIN_KEY: str = "SPRITESHEET_MANAGER"

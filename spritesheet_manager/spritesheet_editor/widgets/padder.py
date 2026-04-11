@@ -2,8 +2,8 @@ import math
 from krita import Krita
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
-from ....core.serializer import Serializer
-from ...core.padder import Padder
+from ...core.serializer import Serializer
+from ..core.padder import Padder
 
 # TODO: REVIEW ALL USAGE OF activeDocument on all files and classes
 # TODO: FINISH PADDER INTEGRATION

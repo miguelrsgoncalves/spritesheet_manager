@@ -1,6 +1,6 @@
 import os
 from krita import Krita
-from .ui.widgets.padder import PadderDialog
+from .widgets.padder import PadderDialog
 
 def run_padder_dialog():
     if not has_active_document: return
