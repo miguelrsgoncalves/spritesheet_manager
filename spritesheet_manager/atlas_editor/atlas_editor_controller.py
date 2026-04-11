@@ -41,3 +41,6 @@ class AtlasEditorController:
 
     def on_grid_changed(self, doc):
         self.save_to_document(doc)
+
+def has_active_document() -> bool:
+    return True if Krita.instance().activeDocument() else False
