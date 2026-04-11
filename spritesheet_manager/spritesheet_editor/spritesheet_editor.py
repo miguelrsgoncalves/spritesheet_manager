@@ -3,7 +3,8 @@ from krita import Krita
 from .ui.widgets.padder import PadderDialog
 
 def run_padder_dialog():
-    krita = Krita.instance()
-    document = krita.activeDocument()
-    if not document: return
+    if not has_active_document: return
     PadderDialog()
+
+def has_active_document() -> bool:
+    return True if Krita.instance().activeDocument() else False
