@@ -1,3 +1,4 @@
+import math
 from krita import Krita
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QCheckBox, QPushButton, QLineEdit, QGroupBox, QDialogButtonBox
@@ -26,21 +27,19 @@ class PadderWidget(QWidget):
         super().__init__()
         self.document: any = document
 
-        root_layout: QVBoxLayout = QVBoxLayout()
+        layout: QVBoxLayout = QVBoxLayout()
 
-        root_layout.addWidget(self._build_tile_size_widget())
-        root_layout.addWidget(self._build_padding_widget())
-        root_layout.addWidget(self._build_grid_widget())
-        root_layout.addWidget(self._build_options_widget())
-        root_layout.addWidget(self._build_output_widget())
+        layout.addWidget(self._build_padding_settings_group())
+        layout.addWidget(self._build_options_widget())
+        layout.addWidget(self._build_output_widget())
 
-        self.setLayout(root_layout)
+        self.setLayout(layout)
 
     #region functions
 
     def get_padder_arguments(self):
         return {
-            "tile_size": [self._tile_width_spin.value(), self._tile_height_spin.value()],
+            "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
             "grid_size": [self._columns_spin.value(), self._rows_spin.value()],
             "padding_size": [self._padding_width_spin.value(), self._padding_height_spin.value()],
             "anti_bleed": self._anti_bleed_checkbox.isChecked(),
@@ -61,8 +60,8 @@ class PadderWidget(QWidget):
         if not self._auto_update_checkbox.isChecked():
             return
             
-        tile_width = self._tile_width_spin.value()
-        tile_height = self._tile_height_spin.value()
+        tile_width = self.tile_width_input.value()
+        tile_height = self.tile_height_input.value()
         
         document_width, document_height = self._document_size
         
@@ -79,34 +78,34 @@ class PadderWidget(QWidget):
     
     #endregion
 
-    #region widgets
+    #region groups
 
-    def _build_tile_size_widget(self):
-        widget = QGroupBox("Tile Size")
-        layout = QHBoxLayout()
+    def _build_padding_settings_group(self):
+        group: QGroupBox = QGroupBox("Padding Settings")
 
-        self._tile_width_spin = QSpinBox()
-        self._tile_width_spin.setRange(1, 999999)
-        self._tile_width_spin.setValue(64)
+        padding_settings_layout: QHBoxLayout = QHBoxLayout()
 
-        self._tile_height_spin = QSpinBox()
-        self._tile_height_spin.setRange(1, 999999)
-        self._tile_height_spin.setValue(64)
+        tile_size_layout: QVBoxLayout = QVBoxLayout()
 
-        layout.addWidget(QLabel("Width"))
-        layout.addWidget(self._tile_width_spin)
-        layout.addWidget(self._link_button)
-        layout.addWidget(QLabel("Height"))
-        layout.addWidget(self._tile_height_spin)
+        width_layout: QHBoxLayout = QHBoxLayout()
+        self.tile_width_input: QSpinBox = QSpinBox()
+        self.tile_width_input.setRange(1, math.inf)
+        self.tile_width_input.setValue(64)
+        width_layout.addWidget(QLabel("Width:"))
+        width_layout.addWidget(self.tile_width_input)
 
-        widget.setLayout(layout)
+        height_layout: QHBoxLayout = QHBoxLayout()
+        self.tile_height_input: QSpinBox = QSpinBox()
+        self.tile_height_input.setRange(1, math.inf)
+        self.tile_height_input.setValue(64)
+        height_layout.addWidget(QLabel("Height:"))
+        height_layout.addWidget(self.tile_height_input)
 
-        return widget
+        tile_size_layout.addWidget(width_layout)
+        tile_size_layout.addWidget(height_layout)
+        padding_settings_layout.addWidget(tile_size_layout)
 
-    def _build_padding_widget(self):
-        group = QGroupBox("Padding")
-        layout = QHBoxLayout()
-        layout.setSpacing(6)
+        padding_size_layout: QVBoxLayout = QVBoxLayout()
 
         self._padding_width_spin = QSpinBox()
         self._padding_width_spin.setRange(0, 999999)
@@ -121,7 +120,8 @@ class PadderWidget(QWidget):
         layout.addWidget(QLabel("Vertical"))
         layout.addWidget(self._padding_height_spin)
 
-        group.setLayout(layout)
+        group.setLayout(input_layout)
+        
         return group
 
     def _build_grid_widget(self):
@@ -207,8 +207,8 @@ class PadderWidget(QWidget):
     
     def set_state(self, state):
         tile_width, tile_height = state.get("tile_size", DEFAULTS["tile_size"])
-        self._tile_width_spin.setValue(tile_width)
-        self._tile_height_spin.setValue(tile_height)
+        self.tile_width_input.setValue(tile_width)
+        self.tile_height_input.setValue(tile_height)
 
         columns, rows = state.get("grid_size", DEFAULTS["grid_size"])
         self._columns_spin.setValue(columns)
@@ -231,7 +231,7 @@ class PadderWidget(QWidget):
     
     def get_state(self) -> dict[str, any]:
         return {
-            "tile_size": [self._tile_width_spin.value(), self._tile_height_spin.value()],
+            "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
             "grid_size": [self._columns_spin.value(), self._rows_spin.value()],
             "padding_size": [self._padding_width_spin.value(), self._padding_height_spin.value()],
             
