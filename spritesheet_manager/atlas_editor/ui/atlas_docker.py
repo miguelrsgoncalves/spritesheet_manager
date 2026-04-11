@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from .atlas_canvas import AtlasCanvas
 from .atlas_panel import AtlasPanel
-from ..atlas_editor_controller import get_controller
+from ..atlas_editor import get_controller
 
 
 class AtlasDocker(DockWidget):

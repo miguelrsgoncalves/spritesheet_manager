@@ -2,16 +2,7 @@ from krita import Krita
 from .models.atlas_model import AtlasModel
 from .states.atlas_state import load_atlas_state, save_atlas_state
 
-_instance = None
-
-def get_controller():
-    global _instance
-    if _instance is None:
-        _instance = AtlasEditorController()
-    return _instance
-
-
-class AtlasEditorController:
+class AtlasEditor:
 
     def __init__(self):
         self._model = AtlasModel()
