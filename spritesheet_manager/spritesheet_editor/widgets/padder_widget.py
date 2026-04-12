@@ -1,8 +1,9 @@
 from krita import Krita
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 from ..core.padder import Padder
+from ...ui.widgets import LinkButton
 
 MAX_INT = 2147483647
 
@@ -87,6 +88,9 @@ class PadderWidget(QWidget):
         tile_size_layout.addWidget(QLabel("Tile Size"))
         tile_size_layout.addLayout(tile_width_layout)
         tile_size_layout.addLayout(tile_height_layout)
+        self._tile_size_link_input: LinkButton = LinkButton()
+        self._tile_size_link_input.setToolTip("Constrain proportions")
+        tile_size_layout.addWidget(self._tile_size_link_input)
 
         grid_size_layout: QVBoxLayout = QVBoxLayout()
         grid_size_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -162,13 +166,11 @@ class PadderWidget(QWidget):
 
         file_name_layout: QHBoxLayout = QHBoxLayout()
         file_name_layout.addWidget(QLabel("File name"))
-        self._file_name_input = QLineEdit(self._get_default_padded_file_name())
+        self._file_name_input: QLineEdit = QLineEdit(self._get_default_padded_file_name())
         file_name_layout.addWidget(self._file_name_input)
-
-        self._export_kra_input = QCheckBox("Save .kra")
+        self._export_kra_input: QCheckBox = QCheckBox("Save .kra")
         self._export_kra_input.setChecked(False)
-
-        self._export_image_input = QCheckBox("Export image")
+        self._export_image_input: QCheckBox = QCheckBox("Export image")
         self._export_image_input.setChecked(True)
 
         output_layout.addLayout(file_name_layout)
