@@ -55,23 +55,6 @@ class PadderWidget(QWidget):
         self.grid_rows_input.setEnabled(not auto_on)
         if auto_on:
             self._on_tile_size_changed()
-
-    def _on_tile_size_changed(self):
-        if not self._auto_update_checkbox.isChecked():
-            return
-            
-        tile_width = self.tile_width_input.value()
-        tile_height = self.tile_height_input.value()
-        
-        document_width, document_height = self._document_size
-        
-        if document_width > 0:
-            self.grid_columns_input.setValue(max(1, document_width // tile_width))
-        if document_height > 0:
-            self.grid_rows_input.setValue(max(1, document_height // tile_height))
-            
-        self.padding_width_input.setValue(max(0, tile_width // 8))
-        self.padding_height_input.setValue(max(0, tile_height // 8))
     
     def _get_default_padded_file_name(self) -> str:
         return self.document.name() + DEFAULTS.get("padded_file_suffix")
@@ -228,20 +211,25 @@ class PadderWidget(QWidget):
     #endregion
 
     #region signals
+    
+    def _on_tile_size_changed(self):
+        if not self.auto_update_grid_size.isChecked() and not self.auto_update_padding_size.isChecked(): return
 
-    def _on_active_canvas_changed(self):
-        self.document = Krita.instance().activeDocument()
-        self._load_state()
+        tile_width = self.tile_width_input.value()
+        tile_height = self.tile_height_input.value()
+
+        if self.auto_update_grid_size.isChecked():
+            document_width, document_height = self.document.width(), self.document.height()
+            if document_width > 0:
+                self.grid_columns_input.setValue(max(1, document_width // tile_width))
+            if document_height > 0:
+                self.grid_rows_input.setValue(max(1, document_height // tile_height))
+        
+        if self.auto_update_padding_size.isChecked():
+            self.padding_width_input.setValue(max(0, tile_width // 8))
+            self.padding_height_input.setValue(max(0, tile_height // 8))
 
     #endregion
-
-    def closeEvent(self, a0):
-        try:
-            notifier = Krita.instance().notifier()
-            notifier.activeCanvasChanged.disconnect(self.on_active_canvas_changed)
-        except:
-            pass
-        return super().closeEvent(a0)
 
 class PadderDialog:
     def __init__(self):
