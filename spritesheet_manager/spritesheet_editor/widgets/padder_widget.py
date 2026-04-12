@@ -16,11 +16,10 @@ DEFAULTS: dict[str, any] = {
     "anti_bleed": True,
     "export_kra": False,
     "export_image": True,
+    "padded_file_suffix": "_padded"
 }
 
 class PadderWidget(QWidget):
-    accept_requested = pyqtSignal(dict)
-
     def __init__(self, document):
         super().__init__()
         self.document: any = document
@@ -35,7 +34,10 @@ class PadderWidget(QWidget):
 
     #region functions
 
-    def get_padder_arguments(self):
+    def run_padder(self):
+        Padder.run(self._get_padder_arguments())
+    
+    def _get_padder_arguments(self):
         return {
             "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
             "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
@@ -70,9 +72,9 @@ class PadderWidget(QWidget):
             
         self.padding_width_input.setValue(max(0, tile_width // 8))
         self.padding_height_input.setValue(max(0, tile_height // 8))
-
-    def _on_apply(self):
-        self.accept_requested.emit(self.get_values())
+    
+    def _get_default_padded_file_name(self) -> str:
+        return self.document.name() + DEFAULTS.get("padded_file_suffix")
     
     #endregion
 
@@ -143,14 +145,12 @@ class PadderWidget(QWidget):
         return group
 
     def _build_options_group(self):
-        group = QGroupBox("Options")
-        options_layout = QVBoxLayout()
+        group : QGroupBox= QGroupBox("Options")
+        options_layout: QVBoxLayout = QVBoxLayout()
 
-        self.anti_bleed_input = QCheckBox("Anti-pixel-bleed padding")
+        self.anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
         self.anti_bleed_input.setChecked(DEFAULTS.get["anti-bleed"])
-        self.anti_bleed_input.setToolTip(
-            "Repeats edge pixels into the padding area to prevent colour bleeding at tile seams."
-        )
+        self.anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
 
         options_layout.addWidget(self.anti_bleed_input)
 
@@ -158,14 +158,13 @@ class PadderWidget(QWidget):
         return group
 
     def _build_output_group(self):
-        group = QGroupBox("Output")
-        output_layout = QVBoxLayout()
+        group: QGroupBox = QGroupBox("Output")
+        output_layout: QHBoxLayout = QVBoxLayout()
 
-        name_row = QHBoxLayout()
-        name_row.addWidget(QLabel("File name"))
-        self._name_input = QLineEdit(self.document.fileName())
-        name_row.addWidget(self._name_input)
-        output_layout.addLayout(name_row)
+        file_name_layout: QHBoxLayout = QHBoxLayout()
+        file_name_layout.addWidget(QLabel("File name"))
+        self._name_input = QLineEdit(self.get_default_padded_file_name())
+        file_name_layout.addWidget(self._name_input)
 
         self.export_kra_input = QCheckBox("Save .kra")
         self.export_kra_input.setChecked(False)
@@ -173,15 +172,7 @@ class PadderWidget(QWidget):
         self.export_image_input = QCheckBox("Export image")
         self.export_image_input.setChecked(True)
 
-        def _on_save_kra_toggled(checked):
-            if not checked:
-                self.export_image_input.setChecked(True)
-                self.export_image_input.setEnabled(False)
-            else:
-                self.export_image_input.setEnabled(True)
-
-        self.export_kra_input.toggled.connect(_on_save_kra_toggled)
-
+        output_layout.addLayout(file_name_layout)
         output_layout.addWidget(self.export_kra_input)
         output_layout.addWidget(self.export_image_input)
 
@@ -192,14 +183,14 @@ class PadderWidget(QWidget):
 
     #region state
 
-    def load_state(self):
+    def _load_state(self):
         krita = Krita.instance()
         document = krita.activeDocument()
 
         state: dict[str, any] = Serializer.load_state(document, WIDGET_KEY)
-        self.set_state(state)
+        self._set_state(state)
     
-    def set_state(self, state):
+    def _set_state(self, state):
         tile_width, tile_height = state.get("tile_size", DEFAULTS["tile_size"])
         self.tile_width_input.setValue(tile_width)
         self.tile_height_input.setValue(tile_height)
@@ -216,14 +207,14 @@ class PadderWidget(QWidget):
         self.export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
         self.export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
 
-    def save_state(self):
+    def _save_state(self):
         krita = Krita.instance()
         document = krita.activeDocument()
 
-        data: dict[str, any] = self.get_state()
+        data: dict[str, any] = self._get_state()
         Serializer.save_state(document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
     
-    def get_state(self) -> dict[str, any]:
+    def _get_state(self) -> dict[str, any]:
         return {
             "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
             "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
@@ -238,9 +229,9 @@ class PadderWidget(QWidget):
 
     #region signals
 
-    def on_active_canvas_changed(self):
+    def _on_active_canvas_changed(self):
         self.document = Krita.instance().activeDocument()
-        self.load_state()
+        self._load_state()
 
     #endregion
 
@@ -274,7 +265,4 @@ class PadderDialog:
 
         if dialog.exec_() != QDialog.Accepted: return None
 
-        self.run_padder(padder_widget.get_padder_arguments())
-
-    def run_padder(padder_arguments: dict[str, any]):
-        Padder.run(padder_arguments)
+        padder_widget.run_padder()
