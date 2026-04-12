@@ -23,7 +23,7 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     def __init__(self, document):
         super().__init__()
-        self.document: any = document
+        self._document: any = document
 
         layout: QVBoxLayout = QVBoxLayout()
 
@@ -40,17 +40,17 @@ class PadderWidget(QWidget):
     
     def _get_padder_arguments(self):
         return {
-            "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
-            "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
-            "padding_size": [self.padding_width_input.value(), self.padding_height_input.value()],
-            "anti_bleed": self.anti_bleed_input.isChecked(),
+            "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
+            "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
+            "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
+            "anti_bleed": self._anti_bleed_input.isChecked(),
             "name": self._name_input.text(),
-            "export_kra": self.export_kra_input.isChecked(),
-            "export_image": self.export_image_input.isChecked(),
+            "export_kra": self._export_kra_input.isChecked(),
+            "export_image": self._export_image_input.isChecked(),
         }
     
     def _get_default_padded_file_name(self) -> str:
-        return self.document.name() + DEFAULTS.get("padded_file_suffix")
+        return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
     
     #endregion
 
@@ -62,66 +62,66 @@ class PadderWidget(QWidget):
 
         tile_size_layout: QVBoxLayout = QVBoxLayout()
         tile_width_layout: QHBoxLayout = QHBoxLayout()
-        self.tile_width_input: QSpinBox = QSpinBox()
-        self.tile_width_input.setRange(1, MAX_INT)
-        self.tile_width_input.setValue(DEFAULTS.get("tile_size")[0])
-        self.tile_width_input.valueChanged.connect(self._on_tile_size_changed)
+        self._tile_width_input: QSpinBox = QSpinBox()
+        self._tile_width_input.setRange(1, MAX_INT)
+        self._tile_width_input.setValue(DEFAULTS.get("tile_size")[0])
+        self._tile_width_input.valueChanged.connect(self._on_tile_size_changed)
         tile_width_layout.addWidget(QLabel("Width:"))
-        tile_width_layout.addWidget(self.tile_width_input)
+        tile_width_layout.addWidget(self._tile_width_input)
         tile_height_layout: QHBoxLayout = QHBoxLayout()
-        self.tile_height_input: QSpinBox = QSpinBox()
-        self.tile_height_input.setRange(1, MAX_INT)
-        self.tile_height_input.setValue(DEFAULTS.get("tile_size")[1])
-        self.tile_height_input.valueChanged.connect(self._on_tile_size_changed)
+        self._tile_height_input: QSpinBox = QSpinBox()
+        self._tile_height_input.setRange(1, MAX_INT)
+        self._tile_height_input.setValue(DEFAULTS.get("tile_size")[1])
+        self._tile_height_input.valueChanged.connect(self._on_tile_size_changed)
         tile_height_layout.addWidget(QLabel("Height:"))
-        tile_height_layout.addWidget(self.tile_height_input)
+        tile_height_layout.addWidget(self._tile_height_input)
         tile_size_layout.addWidget(QLabel("Tile Size"))
         tile_size_layout.addLayout(tile_width_layout)
         tile_size_layout.addLayout(tile_height_layout)
 
         grid_size_layout: QVBoxLayout = QVBoxLayout()
         grid_width_layout: QHBoxLayout = QHBoxLayout()
-        self.grid_columns_input: QSpinBox = QSpinBox()
-        self.grid_columns_input.setRange(1, MAX_INT)
-        self.grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
+        self._grid_columns_input: QSpinBox = QSpinBox()
+        self._grid_columns_input.setRange(1, MAX_INT)
+        self._grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
         grid_width_layout.addWidget(QLabel("Columns:"))
-        grid_width_layout.addWidget(self.grid_columns_input)
+        grid_width_layout.addWidget(self._grid_columns_input)
         grid_height_layout: QHBoxLayout = QHBoxLayout()
-        self.grid_rows_input: QSpinBox = QSpinBox()
-        self.grid_rows_input.setRange(1, MAX_INT)
-        self.grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
+        self._grid_rows_input: QSpinBox = QSpinBox()
+        self._grid_rows_input.setRange(1, MAX_INT)
+        self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
         grid_height_layout.addWidget(QLabel("Rows:"))
-        grid_height_layout.addWidget(self.grid_rows_input)
-        self.grid_size_auto_update_input: QCheckBox = QCheckBox("Auto-update")
-        self.grid_size_auto_update_input.setChecked(DEFAULTS.get("grid_size_auto_update"))
-        self.grid_size_auto_update_input.setToolTip("Auto-update the grid size using the tile size and the document's size.")
-        self.grid_size_auto_update_input.toggled.connect(self._on_grid_auto_update_toggled)
+        grid_height_layout.addWidget(self._grid_rows_input)
+        self._grid_size_auto_update_input: QCheckBox = QCheckBox("Auto-update")
+        self._grid_size_auto_update_input.setChecked(DEFAULTS.get("grid_size_auto_update"))
+        self._grid_size_auto_update_input.setToolTip("Auto-update the grid size using the tile size and the document's size.")
+        self._grid_size_auto_update_input.toggled.connect(self._on_grid_auto_update_toggled)
         grid_size_layout.addWidget(QLabel("Grid Size"))
         grid_size_layout.addLayout(grid_width_layout)
         grid_size_layout.addLayout(grid_height_layout)
-        grid_size_layout.addWidget(self.grid_size_auto_update_input)
+        grid_size_layout.addWidget(self._grid_size_auto_update_input)
 
         padding_size_layout: QVBoxLayout = QVBoxLayout()
         padding_width_layout: QHBoxLayout = QHBoxLayout()
-        self.padding_width_input: QSpinBox = QSpinBox()
-        self.padding_width_input.setRange(0, MAX_INT)
-        self.padding_width_input.setValue(DEFAULTS.get("padding_size")[0])
+        self._padding_width_input: QSpinBox = QSpinBox()
+        self._padding_width_input.setRange(0, MAX_INT)
+        self._padding_width_input.setValue(DEFAULTS.get("padding_size")[0])
         padding_width_layout.addWidget(QLabel("Width:"))
-        padding_width_layout.addWidget(self.padding_width_input)
+        padding_width_layout.addWidget(self._padding_width_input)
         padding_height_layout: QHBoxLayout = QHBoxLayout()
-        self.padding_height_input: QSpinBox = QSpinBox()
-        self.padding_height_input.setRange(0, MAX_INT)
-        self.padding_height_input.setValue(DEFAULTS.get("padding_size")[1])
+        self._padding_height_input: QSpinBox = QSpinBox()
+        self._padding_height_input.setRange(0, MAX_INT)
+        self._padding_height_input.setValue(DEFAULTS.get("padding_size")[1])
         padding_height_layout.addWidget(QLabel("Height:"))
-        padding_height_layout.addWidget(self.padding_height_input)
-        self.padding_size_auto_update_input: QCheckBox = QCheckBox("Auto-update")
-        self.padding_size_auto_update_input.setChecked(DEFAULTS.get("padding_size_auto_update"))
-        self.padding_size_auto_update_input.setToolTip("Auto-update the padding size using the tile size, by default dividing the tile size by 8.")
-        self.padding_size_auto_update_input.toggled.connect(self._on_padding_auto_update_toggled)
+        padding_height_layout.addWidget(self._padding_height_input)
+        self._padding_size_auto_update_input: QCheckBox = QCheckBox("Auto-update")
+        self._padding_size_auto_update_input.setChecked(DEFAULTS.get("padding_size_auto_update"))
+        self._padding_size_auto_update_input.setToolTip("Auto-update the padding size using the tile size, by default dividing the tile size by 8.")
+        self._padding_size_auto_update_input.toggled.connect(self._on_padding_auto_update_toggled)
         padding_size_layout.addWidget(QLabel("Padding Size"))
         padding_size_layout.addLayout(padding_width_layout)
         padding_size_layout.addLayout(padding_height_layout)
-        padding_size_layout.addWidget(self.padding_size_auto_update_input)
+        padding_size_layout.addWidget(self._padding_size_auto_update_input)
 
         padding_settings_layout.addLayout(tile_size_layout)
         padding_settings_layout.addSpacing(24)
@@ -136,11 +136,11 @@ class PadderWidget(QWidget):
         group : QGroupBox= QGroupBox("Options")
         options_layout: QVBoxLayout = QVBoxLayout()
 
-        self.anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
-        self.anti_bleed_input.setChecked(DEFAULTS.get("anti_bleed"))
-        self.anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
+        self._anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
+        self._anti_bleed_input.setChecked(DEFAULTS.get("anti_bleed"))
+        self._anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
 
-        options_layout.addWidget(self.anti_bleed_input)
+        options_layout.addWidget(self._anti_bleed_input)
 
         group.setLayout(options_layout)
         return group
@@ -151,18 +151,18 @@ class PadderWidget(QWidget):
 
         file_name_layout: QHBoxLayout = QHBoxLayout()
         file_name_layout.addWidget(QLabel("File name"))
-        self.file_name_input = QLineEdit(self._get_default_padded_file_name())
-        file_name_layout.addWidget(self.file_name_input)
+        self._file_name_input = QLineEdit(self._get_default_padded_file_name())
+        file_name_layout.addWidget(self._file_name_input)
 
-        self.export_kra_input = QCheckBox("Save .kra")
-        self.export_kra_input.setChecked(False)
+        self._export_kra_input = QCheckBox("Save .kra")
+        self._export_kra_input.setChecked(False)
 
-        self.export_image_input = QCheckBox("Export image")
-        self.export_image_input.setChecked(True)
+        self._export_image_input = QCheckBox("Export image")
+        self._export_image_input.setChecked(True)
 
         output_layout.addLayout(file_name_layout)
-        output_layout.addWidget(self.export_kra_input)
-        output_layout.addWidget(self.export_image_input)
+        output_layout.addWidget(self._export_kra_input)
+        output_layout.addWidget(self._export_image_input)
 
         group.setLayout(output_layout)
         return group
@@ -180,20 +180,20 @@ class PadderWidget(QWidget):
     
     def _set_state(self, state):
         tile_width, tile_height = state.get("tile_size", DEFAULTS["tile_size"])
-        self.tile_width_input.setValue(tile_width)
-        self.tile_height_input.setValue(tile_height)
+        self._tile_width_input.setValue(tile_width)
+        self._tile_height_input.setValue(tile_height)
 
         columns, rows = state.get("grid_size", DEFAULTS["grid_size"])
-        self.grid_columns_input.setValue(columns)
-        self.grid_rows_input.setValue(rows)
+        self._grid_columns_input.setValue(columns)
+        self._grid_rows_input.setValue(rows)
 
         padding_width, padding_height = state.get("padding_size", DEFAULTS["padding_size"])
-        self.padding_width_input.setValue(padding_width)
-        self.padding_height_input.setValue(padding_height)
+        self._padding_width_input.setValue(padding_width)
+        self._padding_height_input.setValue(padding_height)
 
-        self.anti_bleed_input.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
-        self.export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
-        self.export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
+        self._anti_bleed_input.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
+        self._export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
+        self._export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
 
     def _save_state(self):
         krita = Krita.instance()
@@ -204,13 +204,12 @@ class PadderWidget(QWidget):
     
     def _get_state(self) -> dict[str, any]:
         return {
-            "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
-            "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
-            "padding_size": [self.padding_width_input.value(), self.padding_height_input.value()],
-            
-            "anti_bleed": self.anti_bleed_input.isChecked(),
-            "export_kra": self.export_kra_input.isChecked(),
-            "export_image": self.export_image_input.isChecked(),
+            "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
+            "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
+            "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
+            "anti_bleed": self._anti_bleed_input.isChecked(),
+            "export_kra": self._export_kra_input.isChecked(),
+            "export_image": self._export_image_input.isChecked(),
         }
     
     #endregion
@@ -218,29 +217,29 @@ class PadderWidget(QWidget):
     #region signals
     
     def _on_tile_size_changed(self):
-        if not self.grid_size_auto_update_input.isChecked() and not self.padding_size_auto_update_input.isChecked(): return
+        if not self._grid_size_auto_update_input.isChecked() and not self._padding_size_auto_update_input.isChecked(): return
 
-        tile_width = self.tile_width_input.value()
-        tile_height = self.tile_height_input.value()
+        tile_width = self._tile_width_input.value()
+        tile_height = self._tile_height_input.value()
 
-        if self.auto_update_grid_size.isChecked() and self.document:
-            document_width, document_height = self.document.width(), self.document.height()
-            self.grid_columns_input.setValue(max(1, document_width // tile_width))
-            self.grid_rows_input.setValue(max(1, document_height // tile_height))
+        if self.auto_update_grid_size.isChecked() and self._document:
+            document_width, document_height = self._document.width(), self._document.height()
+            self._grid_columns_input.setValue(max(1, document_width // tile_width))
+            self._grid_rows_input.setValue(max(1, document_height // tile_height))
         
-        if self.auto_update_padding_size.isChecked() and self.document:
-            self.padding_width_input.setValue(max(0, tile_width // 8))
-            self.padding_height_input.setValue(max(0, tile_height // 8))
+        if self.auto_update_padding_size.isChecked() and self._document:
+            self._padding_width_input.setValue(max(0, tile_width // 8))
+            self._padding_height_input.setValue(max(0, tile_height // 8))
     
     def _on_grid_auto_update_toggled(self):
-        grid_auto_update: bool = self.grid_size_auto_update_input.isChecked()
-        self.grid_columns_input.setEnabled(not grid_auto_update)
-        self.grid_rows_input.setEnabled(not grid_auto_update)
+        grid_auto_update: bool = self._grid_size_auto_update_input.isChecked()
+        self._grid_columns_input.setEnabled(not grid_auto_update)
+        self._grid_rows_input.setEnabled(not grid_auto_update)
     
     def _on_padding_auto_update_toggled(self):
-        padding_auto_update: bool = self.padding_size_auto_update_input.isChecked()
-        self.padding_width_input.setEnabled(not padding_auto_update)
-        self.padding_height_input.setEnabled(not padding_auto_update)
+        padding_auto_update: bool = self._padding_size_auto_update_input.isChecked()
+        self._padding_width_input.setEnabled(not padding_auto_update)
+        self._padding_height_input.setEnabled(not padding_auto_update)
 
     #endregion
 
