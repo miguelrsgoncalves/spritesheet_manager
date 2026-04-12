@@ -78,6 +78,7 @@ class PadderWidget(QWidget):
         tile_size_layout.addWidget(QLabel("Tile Size"))
         tile_size_layout.addLayout(tile_width_layout)
         tile_size_layout.addLayout(tile_height_layout)
+        tile_size_layout.addWidget(Q)
 
         grid_size_layout: QVBoxLayout = QVBoxLayout()
         grid_width_layout: QHBoxLayout = QHBoxLayout()
@@ -222,12 +223,12 @@ class PadderWidget(QWidget):
         tile_width = self._tile_width_input.value()
         tile_height = self._tile_height_input.value()
 
-        if self.auto_update_grid_size.isChecked() and self._document:
+        if self._grid_size_auto_update_input.isChecked() and self._document:
             document_width, document_height = self._document.width(), self._document.height()
             self._grid_columns_input.setValue(max(1, document_width // tile_width))
             self._grid_rows_input.setValue(max(1, document_height // tile_height))
         
-        if self.auto_update_padding_size.isChecked() and self._document:
+        if self._padding_size_auto_update_input.isChecked() and self._document:
             self._padding_width_input.setValue(max(0, tile_width // 8))
             self._padding_height_input.setValue(max(0, tile_height // 8))
     
