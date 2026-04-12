@@ -48,7 +48,7 @@ class PadderWidget(QWidget):
             "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
             "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
             "anti_bleed": self._anti_bleed_input.isChecked(),
-            "name": self._name_input.text(),
+            "name": self._file_name_input.text(),
             "export_kra": self._export_kra_input.isChecked(),
             "export_image": self._export_image_input.isChecked(),
         }
@@ -155,10 +155,10 @@ class PadderWidget(QWidget):
         self._padding_size_link_button.setToolTip("Link values")
         self._padding_size_link_button.link_changed.connect(self._on_padding_size_changed)
 
-        padding_size_layout.addWidget(QLabel("Grid Size"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
-        padding_size_layout.addWidget(QLabel("Columns:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        padding_size_layout.addWidget(QLabel("Padding Size"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
+        padding_size_layout.addWidget(QLabel("Width:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         padding_size_layout.addWidget(self._padding_width_input, 1, 1)
-        padding_size_layout.addWidget(QLabel("Rows:"), 2, 0, Qt.AlignmentFlag.AlignRight)
+        padding_size_layout.addWidget(QLabel("Height:"), 2, 0, Qt.AlignmentFlag.AlignRight)
         padding_size_layout.addWidget(self._padding_height_input, 2, 1)
         padding_size_layout.addWidget(self._padding_size_link_button, 1, 3, 2, 3, Qt.AlignmentFlag.AlignVCenter)
         padding_size_layout.addWidget(self._padding_size_auto_update_checkbox, 3, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
@@ -306,7 +306,7 @@ class PadderWidget(QWidget):
         self._grid_size_link_button.setEnabled(not grid_auto_update)
 
         if grid_auto_update == True:
-            self._on_tile_size_changed(self)
+            self._on_tile_size_changed()
 
     def _on_padding_size_changed(self):
         if self._padding_size_link_button.is_linked():
@@ -328,7 +328,7 @@ class PadderWidget(QWidget):
         self._padding_size_link_button.setEnabled(not padding_auto_update)
 
         if padding_auto_update == True:
-            self._on_tile_size_changed(self)
+            self._on_tile_size_changed()
 
     #endregion
 
