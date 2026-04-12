@@ -28,8 +28,8 @@ class PadderWidget(QWidget):
         layout: QVBoxLayout = QVBoxLayout()
 
         layout.addWidget(self._build_padding_settings_group())
-        layout.addWidget(self._build_options_widget())
-        layout.addWidget(self._build_output_widget("name"))
+        layout.addWidget(self._build_options_group())
+        layout.addWidget(self._build_output_group())
 
         self.setLayout(layout)
 
@@ -40,10 +40,10 @@ class PadderWidget(QWidget):
             "tile_size": [self.tile_width_input.value(), self.tile_height_input.value()],
             "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
             "padding_size": [self.padding_width_input.value(), self.padding_height_input.value()],
-            "anti_bleed": self._anti_bleed_checkbox.isChecked(),
+            "anti_bleed": self.anti_bleed_input.isChecked(),
             "name": self._name_input.text(),
-            "export_kra": self._save_kra_checkbox.isChecked(),
-            "export_image": self._export_image_checkbox.isChecked(),
+            "export_kra": self.export_kra_input.isChecked(),
+            "export_image": self.export_image_input.isChecked(),
         }
 
     def _update_auto_update_state(self, auto_on):
@@ -142,50 +142,50 @@ class PadderWidget(QWidget):
         group.setLayout(padding_settings_layout)
         return group
 
-    def _build_options_widget(self):
+    def _build_options_group(self):
         group = QGroupBox("Options")
-        layout = QVBoxLayout()
+        options_layout = QVBoxLayout()
 
-        self._anti_bleed_checkbox = QCheckBox("Anti-pixel-bleed padding")
-        self._anti_bleed_checkbox.setChecked(True)
-        self._anti_bleed_checkbox.setToolTip(
-            "Repeats edge pixels into the padding area to prevent colour bleeding at tile seams"
+        self.anti_bleed_input = QCheckBox("Anti-pixel-bleed padding")
+        self.anti_bleed_input.setChecked(DEFAULTS.get["anti-bleed"])
+        self.anti_bleed_input.setToolTip(
+            "Repeats edge pixels into the padding area to prevent colour bleeding at tile seams."
         )
-        layout.addWidget(self._anti_bleed_checkbox)
 
-        group.setLayout(layout)
+        options_layout.addWidget(self.anti_bleed_input)
+
+        group.setLayout(options_layout)
         return group
 
-    def _build_output_widget(self, default_name):
+    def _build_output_group(self):
         group = QGroupBox("Output")
-        layout = QVBoxLayout()
-        layout.setSpacing(6)
+        output_layout = QVBoxLayout()
 
         name_row = QHBoxLayout()
         name_row.addWidget(QLabel("File name"))
-        self._name_input = QLineEdit(default_name)
+        self._name_input = QLineEdit(self.document.fileName())
         name_row.addWidget(self._name_input)
-        layout.addLayout(name_row)
+        output_layout.addLayout(name_row)
 
-        self._save_kra_checkbox = QCheckBox("Save as .kra file")
-        self._save_kra_checkbox.setChecked(False)
+        self.export_kra_input = QCheckBox("Save .kra")
+        self.export_kra_input.setChecked(False)
 
-        self._export_image_checkbox = QCheckBox("Export image")
-        self._export_image_checkbox.setChecked(True)
+        self.export_image_input = QCheckBox("Export image")
+        self.export_image_input.setChecked(True)
 
         def _on_save_kra_toggled(checked):
             if not checked:
-                self._export_image_checkbox.setChecked(True)
-                self._export_image_checkbox.setEnabled(False)
+                self.export_image_input.setChecked(True)
+                self.export_image_input.setEnabled(False)
             else:
-                self._export_image_checkbox.setEnabled(True)
+                self.export_image_input.setEnabled(True)
 
-        self._save_kra_checkbox.toggled.connect(_on_save_kra_toggled)
+        self.export_kra_input.toggled.connect(_on_save_kra_toggled)
 
-        layout.addWidget(self._save_kra_checkbox)
-        layout.addWidget(self._export_image_checkbox)
+        output_layout.addWidget(self.export_kra_input)
+        output_layout.addWidget(self.export_image_input)
 
-        group.setLayout(layout)
+        group.setLayout(output_layout)
         return group
 
     #endregion
@@ -212,9 +212,9 @@ class PadderWidget(QWidget):
         self.padding_width_input.setValue(padding_width)
         self.padding_height_input.setValue(padding_height)
 
-        self._anti_bleed_checkbox.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
-        self._save_kra_checkbox.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
-        self._export_image_checkbox.setChecked(state.get("export_image", DEFAULTS["export_image"]))
+        self.anti_bleed_input.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
+        self.export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
+        self.export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
 
     def save_state(self):
         krita = Krita.instance()
@@ -229,9 +229,9 @@ class PadderWidget(QWidget):
             "grid_size": [self.grid_columns_input.value(), self.grid_rows_input.value()],
             "padding_size": [self.padding_width_input.value(), self.padding_height_input.value()],
             
-            "anti_bleed": self._anti_bleed_checkbox.isChecked(),
-            "export_kra": self._save_kra_checkbox.isChecked(),
-            "export_image": self._export_image_checkbox.isChecked(),
+            "anti_bleed": self.anti_bleed_input.isChecked(),
+            "export_kra": self.export_kra_input.isChecked(),
+            "export_image": self.export_image_input.isChecked(),
         }
     
     #endregion
