@@ -208,6 +208,8 @@ class PadderWidget(QWidget):
         self._export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
         self._export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
 
+        self.refresh_ui()
+
     def _save_state(self):
         krita = Krita.instance()
         document = krita.activeDocument()
