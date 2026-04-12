@@ -1,4 +1,5 @@
 from krita import Krita
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 from ..core.padder import Padder
@@ -33,6 +34,8 @@ class PadderWidget(QWidget):
 
         self.setLayout(layout)
 
+        self.refresh_ui()
+
     #region functions
 
     def run_padder(self):
@@ -48,6 +51,11 @@ class PadderWidget(QWidget):
             "export_kra": self._export_kra_input.isChecked(),
             "export_image": self._export_image_input.isChecked(),
         }
+
+    def refresh_ui(self):
+        self._on_tile_size_changed()
+        self._on_grid_auto_update_toggled()
+        self._on_padding_auto_update_toggled()
     
     def _get_default_padded_file_name(self) -> str:
         return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
@@ -61,6 +69,7 @@ class PadderWidget(QWidget):
         padding_settings_layout: QHBoxLayout = QHBoxLayout()
 
         tile_size_layout: QVBoxLayout = QVBoxLayout()
+        tile_size_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         tile_width_layout: QHBoxLayout = QHBoxLayout()
         self._tile_width_input: QSpinBox = QSpinBox()
         self._tile_width_input.setRange(1, MAX_INT)
@@ -78,9 +87,9 @@ class PadderWidget(QWidget):
         tile_size_layout.addWidget(QLabel("Tile Size"))
         tile_size_layout.addLayout(tile_width_layout)
         tile_size_layout.addLayout(tile_height_layout)
-        tile_size_layout.addWidget(Q)
 
         grid_size_layout: QVBoxLayout = QVBoxLayout()
+        grid_size_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         grid_width_layout: QHBoxLayout = QHBoxLayout()
         self._grid_columns_input: QSpinBox = QSpinBox()
         self._grid_columns_input.setRange(1, MAX_INT)
@@ -103,6 +112,7 @@ class PadderWidget(QWidget):
         grid_size_layout.addWidget(self._grid_size_auto_update_input)
 
         padding_size_layout: QVBoxLayout = QVBoxLayout()
+        padding_size_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         padding_width_layout: QHBoxLayout = QHBoxLayout()
         self._padding_width_input: QSpinBox = QSpinBox()
         self._padding_width_input.setRange(0, MAX_INT)
