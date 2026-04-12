@@ -86,6 +86,7 @@ class PadderWidget(QWidget):
 
         self._tile_size_link_button: LinkButton = LinkButton()
         self._tile_size_link_button.setToolTip("Link values")
+        self._tile_size_link_button.link_changed.connect(self._on_tile_size_changed)
 
         tile_size_layout.addWidget(QLabel("Tile Size"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
         tile_size_layout.addWidget(QLabel("Width:"), 1, 0, Qt.AlignmentFlag.AlignRight)
@@ -93,7 +94,6 @@ class PadderWidget(QWidget):
         tile_size_layout.addWidget(QLabel("Height:"), 2, 0, Qt.AlignmentFlag.AlignRight)
         tile_size_layout.addWidget(self._tile_height_input, 2, 1)
         tile_size_layout.addWidget(self._tile_size_link_button, 1, 3, 2, 3, Qt.AlignmentFlag.AlignVCenter)
-        
 
         #endregion
 
@@ -105,10 +105,12 @@ class PadderWidget(QWidget):
         self._grid_columns_input: QSpinBox = QSpinBox()
         self._grid_columns_input.setRange(1, MAX_INT)
         self._grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
+        self._grid_columns_input.valueChanged.connect(self._on_grid_size_changed)
         
         self._grid_rows_input: QSpinBox = QSpinBox()
         self._grid_rows_input.setRange(1, MAX_INT)
         self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
+        self._grid_rows_input.valueChanged.connect(self._on_grid_size_changed)
 
         self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
         self._grid_size_auto_update_checkbox.setChecked(DEFAULTS.get("grid_size_auto_update"))
@@ -117,6 +119,7 @@ class PadderWidget(QWidget):
 
         self._grid_size_link_button: LinkButton = LinkButton()
         self._grid_size_link_button.setToolTip("Link values")
+        self._grid_size_link_button.link_changed.connect(self._on_grid_size_changed)
 
         grid_size_layout.addWidget(QLabel("Grid Size"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
         grid_size_layout.addWidget(QLabel("Columns:"), 1, 0, Qt.AlignmentFlag.AlignRight)
@@ -136,10 +139,12 @@ class PadderWidget(QWidget):
         self._padding_width_input: QSpinBox = QSpinBox()
         self._padding_width_input.setRange(1, MAX_INT)
         self._padding_width_input.setValue(DEFAULTS.get("padding_size")[0])
+        self._padding_width_input.valueChanged.connect(self._on_padding_size_changed)
         
         self._padding_height_input: QSpinBox = QSpinBox()
         self._padding_height_input.setRange(1, MAX_INT)
         self._padding_height_input.setValue(DEFAULTS.get("padding_size")[1])
+        self._padding_height_input.valueChanged.connect(self._on_padding_size_changed)
 
         self._padding_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
         self._padding_size_auto_update_checkbox.setChecked(DEFAULTS.get("padding_size_auto_update"))
@@ -148,6 +153,7 @@ class PadderWidget(QWidget):
 
         self._padding_size_link_button: LinkButton = LinkButton()
         self._padding_size_link_button.setToolTip("Link values")
+        self._padding_size_link_button.link_changed.connect(self._on_padding_size_changed)
 
         padding_size_layout.addWidget(QLabel("Grid Size"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
         padding_size_layout.addWidget(QLabel("Columns:"), 1, 0, Qt.AlignmentFlag.AlignRight)
@@ -253,6 +259,20 @@ class PadderWidget(QWidget):
     #region signals
     
     def _on_tile_size_changed(self):
+        if self._tile_size_link_button.is_linked():
+            sender = self.sender()
+            
+            if sender == self._tile_width_input:
+                self._tile_height_input.blockSignals(True)
+                self._tile_height_input.setValue(self._tile_width_input.value())
+                self._tile_height_input.blockSignals(False)
+            
+            else:
+                self._tile_width_input.blockSignals(True)
+                self._tile_width_input.setValue(self._tile_height_input.value())
+                self._tile_width_input.blockSignals(False)
+
+
         if self._grid_size_auto_update_checkbox.isChecked() or self._padding_size_auto_update_checkbox.isChecked():
             tile_width = self._tile_width_input.value()
             tile_height = self._tile_height_input.value()
@@ -266,17 +286,49 @@ class PadderWidget(QWidget):
                 self._padding_width_input.setValue(max(0, tile_width // 8))
                 self._padding_height_input.setValue(max(0, tile_height // 8))
     
+    def _on_grid_size_changed(self):
+        if self._grid_size_link_button.is_linked():
+            sender = self.sender()
+
+            if sender == self._grid_columns_input:
+                self._grid_rows_input.blockSignals(True)
+                self._grid_rows_input.setValue(self._grid_columns_input.value())
+                self._grid_rows_input.blockSignals(False)
+            else:
+                self._grid_columns_input.blockSignals(True)
+                self._grid_columns_input.setValue(self._grid_rows_input.value())
+                self._grid_columns_input.blockSignals(False)
+    
     def _on_grid_auto_update_toggled(self):
         grid_auto_update: bool = self._grid_size_auto_update_checkbox.isChecked()
         self._grid_columns_input.setEnabled(not grid_auto_update)
         self._grid_rows_input.setEnabled(not grid_auto_update)
         self._grid_size_link_button.setEnabled(not grid_auto_update)
+
+        if grid_auto_update == True:
+            self._on_tile_size_changed(self)
+
+    def _on_padding_size_changed(self):
+        if self._padding_size_link_button.is_linked():
+            sender = self.sender()
+
+            if sender == self._padding_width_input:
+                self._padding_height_input.blockSignals(True)
+                self._padding_height_input.setValue(self._padding_width_input.value())
+                self._padding_height_input.blockSignals(False)
+            else:
+                self._padding_width_input.blockSignals(True)
+                self._padding_width_input.setValue(self._padding_height_input.value())
+                self._padding_width_input.blockSignals(False)
     
     def _on_padding_auto_update_toggled(self):
         padding_auto_update: bool = self._padding_size_auto_update_checkbox.isChecked()
         self._padding_width_input.setEnabled(not padding_auto_update)
         self._padding_height_input.setEnabled(not padding_auto_update)
         self._padding_size_link_button.setEnabled(not padding_auto_update)
+
+        if padding_auto_update == True:
+            self._on_tile_size_changed(self)
 
     #endregion
 
