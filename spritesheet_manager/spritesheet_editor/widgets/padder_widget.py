@@ -2,7 +2,7 @@ from krita import Krita
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
-from ..core.padder import Padder
+from ...core.padder import Padder
 from ...ui.widgets import LinkButton
 
 MAX_INT = 2147483647

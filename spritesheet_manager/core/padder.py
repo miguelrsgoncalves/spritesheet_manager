@@ -1,7 +1,7 @@
 import os
 from krita import InfoObject
 from PyQt5.QtWidgets import QFileDialog
-from ...core.pixel import read_pixels, write_pixels, repeat_row_vertically
+from .pixel import read_pixels, write_pixels, repeat_row_vertically
 
 EXPORT_FILTERS = (
     "PNG Image (*.png);;"
