@@ -1,7 +1,7 @@
 from krita import Extension
 from PyQt5.QtWidgets import QMainWindow, QMenu
 from .atlas_editor.actions import create_atlas_editor_actions
-from .spritesheet_editor.actions import create_spritesheet_editor_actions
+from .spritesheet_editor.spritesheet_editor import create_spritesheet_editor_actions
 
 class SpritesheetManagerExtension(Extension):
     def __init__(self, parent):
