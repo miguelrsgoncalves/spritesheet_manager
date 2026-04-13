@@ -289,7 +289,7 @@ class PadderWidget(QWidget):
                 self._padding_height_input.setValue(max(0, tile_height // 8))
     
     def _on_grid_size_changed(self):
-        if self._grid_size_link_button.is_linked():
+        if not self._grid_size_auto_update_checkbox.isChecked() and self._grid_size_link_button.is_linked():
             sender = self.sender()
 
             if sender == self._grid_columns_input:
@@ -311,7 +311,7 @@ class PadderWidget(QWidget):
             self._on_tile_size_changed()
 
     def _on_padding_size_changed(self):
-        if self._padding_size_link_button.is_linked():
+        if not self._padding_size_auto_update_checkbox.isChecked() and self._padding_size_link_button.is_linked():
             sender = self.sender()
 
             if sender == self._padding_width_input:
