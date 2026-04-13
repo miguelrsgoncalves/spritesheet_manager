@@ -1,7 +1,7 @@
 import os
-from krita import Krita, InfoObject
+from krita import InfoObject
 from PyQt5.QtWidgets import QFileDialog
-from ...core.pixel import read_pixels, write_pixels, repeat_row_vertically, get_bytes_per_pixel
+from ...core.pixel import read_pixels, write_pixels, repeat_row_vertically
 
 EXPORT_FILTERS = (
     "PNG Image (*.png);;"
@@ -14,29 +14,25 @@ EXPORT_FILTERS = (
 class Padder():
     @staticmethod
     def run(
-        tile_width: int,
-        tile_height: int,
-        padding_x: int,
-        padding_y: int,
-        columns: int,
-        rows: int,
+        document,
+        tile_size: list[int, int],
+        grid_size: list[int, int],
+        padding_size: list[int, int],
         anti_bleed: bool,
-        name: str,
-        save_kra: bool,
+        export_name: str,
+        export_kra: bool,
         export_image: bool
     ):
-        app = Krita.instance()
-        document = krita.activeDocument()
 
-        # Each tile slot is the tile size plus padding on both sides
-        stride_x = tile_width + (padding_x * 2)
-        stride_y = tile_height + (padding_y * 2)
-        new_width = columns * stride_x
-        new_height = rows * stride_y
+        stride_width = tile_size[0] + (padding_size[0] * 2)
+        stride_height = tile_size[1] + (padding_size[1] * 2)
+
+        padded_document_width = grid_size[0] * stride_width
+        padded_document_height = grid_size[1] * stride_height
 
         # New document inherits colour settings from the source
         new_kra = app.createDocument(
-            new_width, new_height, name,
+            padded_document_width, padded_document_height, export_name,
             document.colorModel(),
             document.colorDepth(),
             document.colorProfile(),
@@ -55,56 +51,56 @@ class Padder():
         source_height = document.height()
 
         # Copy each tile from the source into its padded position in the new document
-        for row in range(rows):
-            for col in range(columns):
-                source_x = col * tile_width
-                source_y = row * tile_height
+        for row in range(grid_size[1]):
+            for col in range(grid_size[0]):
+                source_x = col * tile_size[0]
+                source_y = row * tile_size[1]
 
                 if source_x >= source_width or source_y >= source_height:
                     continue
 
-                dest_x = (col * stride_x) + padding_x
-                dest_y = (row * stride_y) + padding_y
+                dest_x = (col * stride_width) + padding_size[0]
+                dest_y = (row * stride_height) + padding_size[1]
 
-                tile_data = read_pixels(document, source_x, source_y, tile_width, tile_height)
-                write_pixels(layer, tile_data, dest_x, dest_y, tile_width, tile_height)
+                tile_data = read_pixels(document, source_x, source_y, tile_size[0], tile_size[1])
+                write_pixels(layer, tile_data, dest_x, dest_y, tile_size[0], tile_size[1])
 
-                if anti_bleed and (padding_x > 0 or padding_y > 0):
-                    _apply_anti_bleed(
+                if anti_bleed and (padding_size[0] > 0 or padding_size[1] > 0):
+                    anti_bleed(
                         document, layer,
                         source_x, source_y,
                         dest_x, dest_y,
-                        tile_width, tile_height,
-                        padding_x, padding_y
+                        tile_size[0], tile_size[1],
+                        padding_size[0], padding_size[1]
                     )
 
         new_kra.refreshProjection()
 
-        original_path = document.fileName()
-        folder = os.path.dirname(original_path) if original_path else ""
+        original_path = document.fileexport_name()
+        folder = os.path.direxport_name(original_path) if original_path else ""
 
         # Only open the document in Krita when keeping the .kra file
-        if save_kra:
+        if export_kra:
             app.activeWindow().addView(new_kra)
             if folder:
-                kra_path = os.path.join(folder, name + ".kra")
-                new_kra.setFileName(kra_path)
+                kra_path = os.path.join(folder, export_name + ".kra")
+                new_kra.setFileexport_name(kra_path)
                 new_kra.save()
 
         if export_image:
-            _export_with_dialog(new_kra, folder, name)
+            _export_with_dialog(new_kra, folder, export_name)
 
         # If not keeping the .kra, close the temporary document
-        if not save_kra:
+        if not export_kra:
             new_kra.close()
 
         return new_kra
 
     @staticmethod
-    def _export_with_dialog(doc, default_folder, default_name):
-        default_path = os.path.join(default_folder, default_name + ".png") if default_folder else default_name + ".png"
+    def _export_with_dialog(doc, default_folder, default_export_name):
+        default_path = os.path.join(default_folder, default_export_name + ".png") if default_folder else default_export_name + ".png"
 
-        export_path, _ = QFileDialog.getSaveFileName(
+        export_path, _ = QFileDialog.getSaveFileexport_name(
             None,
             "Export Spritesheet",
             default_path,
@@ -117,33 +113,33 @@ class Padder():
         doc.exportImage(export_path, InfoObject())
     
     @staticmethod
-    def _apply_anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
-                        tile_width, tile_height, padding_x, padding_y):
+    def anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
+                        tile_size[0], tile_size[1], padding_size[0], padding_size[1]):
 
         # Top and bottom edge bands
-        if padding_y > 0:
-            top_row = read_pixels(source_doc, source_x, source_y, tile_width, 1)
-            bottom_row = read_pixels(source_doc, source_x, source_y + tile_height - 1, tile_width, 1)
-            write_pixels(dest_layer, repeat_row_vertically(top_row, padding_y), dest_x, dest_y - padding_y, tile_width, padding_y)
-            write_pixels(dest_layer, repeat_row_vertically(bottom_row, padding_y), dest_x, dest_y + tile_height, tile_width, padding_y)
+        if padding_size[1] > 0:
+            top_row = read_pixels(source_doc, source_x, source_y, tile_size[0], 1)
+            bottom_row = read_pixels(source_doc, source_x, source_y + tile_size[1] - 1, tile_size[0], 1)
+            write_pixels(dest_layer, repeat_row_vertically(top_row, padding_size[1]), dest_x, dest_y - padding_size[1], tile_size[0], padding_size[1])
+            write_pixels(dest_layer, repeat_row_vertically(bottom_row, padding_size[1]), dest_x, dest_y + tile_size[1], tile_size[0], padding_size[1])
 
         # Left and right edge bands
-        if padding_x > 0:
-            left_col = read_pixels(source_doc, source_x, source_y, 1, tile_height)
-            right_col = read_pixels(source_doc, source_x + tile_width - 1, source_y, 1, tile_height)
-            for i in range(1, padding_x + 1):
-                write_pixels(dest_layer, left_col, dest_x - i, dest_y, 1, tile_height)
-                write_pixels(dest_layer, right_col, dest_x + tile_width + i - 1, dest_y, 1, tile_height)
+        if padding_size[0] > 0:
+            left_col = read_pixels(source_doc, source_x, source_y, 1, tile_size[1])
+            right_col = read_pixels(source_doc, source_x + tile_size[0] - 1, source_y, 1, tile_size[1])
+            for i in range(1, padding_size[0] + 1):
+                write_pixels(dest_layer, left_col, dest_x - i, dest_y, 1, tile_size[1])
+                write_pixels(dest_layer, right_col, dest_x + tile_size[0] + i - 1, dest_y, 1, tile_size[1])
 
         # Corner blocks filled with the single nearest corner pixel repeated
-        if padding_x > 0 and padding_y > 0:
+        if padding_size[0] > 0 and padding_size[1] > 0:
             corners = [
-                (source_x, source_y, dest_x - padding_x, dest_y - padding_y),
-                (source_x + tile_width - 1, source_y, dest_x + tile_width, dest_y - padding_y),
-                (source_x, source_y + tile_height - 1, dest_x - padding_x, dest_y + tile_height),
-                (source_x + tile_width - 1, source_y + tile_height - 1, dest_x + tile_width, dest_y + tile_height),
+                (source_x, source_y, dest_x - padding_size[0], dest_y - padding_size[1]),
+                (source_x + tile_size[0] - 1, source_y, dest_x + tile_size[0], dest_y - padding_size[1]),
+                (source_x, source_y + tile_size[1] - 1, dest_x - padding_size[0], dest_y + tile_size[1]),
+                (source_x + tile_size[0] - 1, source_y + tile_size[1] - 1, dest_x + tile_size[0], dest_y + tile_size[1]),
             ]
 
             for corner_source_x, corner_source_y, corner_dest_x, corner_dest_y in corners:
                 pixel = read_pixels(source_doc, corner_source_x, corner_source_y, 1, 1)
-                write_pixels(dest_layer, pixel * (padding_x * padding_y), corner_dest_x, corner_dest_y, padding_x, padding_y)
+                write_pixels(dest_layer, pixel * (padding_size[0] * padding_size[1]), corner_dest_x, corner_dest_y, padding_size[0], padding_size[1])

@@ -44,11 +44,12 @@ class PadderWidget(QWidget):
     
     def _get_padder_arguments(self):
         return {
+            "document": self._document,
             "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
             "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
             "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
             "anti_bleed": self._anti_bleed_input.isChecked(),
-            "name": self._file_name_input.text(),
+            "export_name": self._export_name_input.text(),
             "export_kra": self._export_kra_input.isChecked(),
             "export_image": self._export_image_input.isChecked(),
         }
@@ -58,7 +59,7 @@ class PadderWidget(QWidget):
         self._on_grid_auto_update_toggled()
         self._on_padding_auto_update_toggled()
     
-    def _get_default_padded_file_name(self) -> str:
+    def _get_default_padded_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
     
     #endregion
@@ -191,16 +192,16 @@ class PadderWidget(QWidget):
         group: QGroupBox = QGroupBox("Output")
         output_layout: QHBoxLayout = QVBoxLayout()
 
-        file_name_layout: QHBoxLayout = QHBoxLayout()
-        file_name_layout.addWidget(QLabel("File name"))
-        self._file_name_input: QLineEdit = QLineEdit(self._get_default_padded_file_name())
-        file_name_layout.addWidget(self._file_name_input)
+        export_name_layout: QHBoxLayout = QHBoxLayout()
+        export_name_layout.addWidget(QLabel("File name"))
+        self._export_name_input: QLineEdit = QLineEdit(self._get_default_padded_export_name())
+        export_name_layout.addWidget(self._export_name_input)
         self._export_kra_input: QCheckBox = QCheckBox("Save .kra")
         self._export_kra_input.setChecked(False)
         self._export_image_input: QCheckBox = QCheckBox("Export image")
         self._export_image_input.setChecked(True)
 
-        output_layout.addLayout(file_name_layout)
+        output_layout.addLayout(export_name_layout)
         output_layout.addWidget(self._export_kra_input)
         output_layout.addWidget(self._export_image_input)
 
