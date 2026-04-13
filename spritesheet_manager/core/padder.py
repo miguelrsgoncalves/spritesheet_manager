@@ -33,13 +33,15 @@ class Padder():
         self._is_export_image = is_export_image
     
     def run(self):
+        krita = Krita.instance()
+
         stride_width: int = self._tile_size[0] + (self._padding_size[0] * 2)
         stride_height: int = self._tile_size[1] + (self._padding_size[1] * 2)
 
         padded_document_width: int = self._grid_size[0] * stride_width
         padded_document_height: int = self._grid_size[1] * stride_height
 
-        padded_document = app.createDocument(
+        padded_document = krita.createDocument(
             padded_document_width, padded_document_height,
             self._export_name,
             self._document.colorModel(),
@@ -87,40 +89,25 @@ class Padder():
 
         padded_document.refreshProjection()
 
-        source_path = document.fileName()
-        folder = os.path.direxport_name(source_path) if source_path else ""
+        source_path: str = self._document.fileName()
+        source_folder: str = os.path.dirname(source_path)
 
-        # Only open the document in Krita when keeping the .kra file
-        if is_export_kra:
-            app.activeWindow().addView(padded_document)
-            if folder:
-                kra_path = os.path.join(folder, export_name + ".kra")
-                padded_document.setFileexport_name(kra_path)
+        if self._is_export_kra:
+            krita.activeWindow().addView(padded_document)
+            if source_folder:
+                kra_path: str = os.path.join(source_folder, self._export_name + ".kra")
+                padded_document.setFileName(kra_path)
                 padded_document.save()
 
-        if is_export_image:
-            _export_with_dialog(padded_document, folder, export_name)
+        if self._is_export_image:
+            image_path: str = os.path.join(source_folder, self._export_name + ".png")
 
-        # If not keeping the .kra, close the temporary document
-        if not is_export_kra:
+            padded_document.exportImage(image_path, InfoObject())
+
+        if not self._is_export_kra:
             padded_document.close()
 
         return padded_document
-
-    def _export_with_dialog(self, doc, default_folder, default_export_name):
-        default_path = os.path.join(default_folder, default_export_name + ".png") if default_folder else default_export_name + ".png"
-
-        export_path, _ = QFileDialog.getSaveFileexport_name(
-            None,
-            "Export Spritesheet",
-            default_path,
-            EXPORT_FILTERS
-        )
-
-        if not export_path:
-            return
-
-        doc.exportImage(export_path, InfoObject())
     
     def anti_bleed(self, source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
                         tile_size[0], tile_size[1], padding_size[0], padding_size[1]):
