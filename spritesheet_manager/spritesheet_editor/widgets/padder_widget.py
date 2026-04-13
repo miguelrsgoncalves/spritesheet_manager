@@ -40,7 +40,7 @@ class PadderWidget(QWidget):
     #region functions
 
     def run_padder(self):
-        padder: Padder = Padder(self._get_padder_arguments())
+        padder: Padder = Padder(**self._get_padder_arguments())
         padder.run()
     
     def _get_padder_arguments(self):

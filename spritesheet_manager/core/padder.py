@@ -79,9 +79,7 @@ class Padder():
                         self._document,
                         padded_layer,
                         source_x, source_y,
-                        destination_x, destination_y,
-                        self._tile_size[0], self._tile_size[1],
-                        self._padding_size[0], self._padding_size[1]
+                        destination_x, destination_y
                     )
 
         padded_document.refreshProjection()
@@ -133,11 +131,11 @@ class Padder():
                 (source_x + self._tile_size[0] - 1, source_y + self._tile_size[1] - 1, destination_x + self._tile_size[0], destination_y + self._tile_size[1]),
             ]
 
-            for corner_source_x, corner_source_y, corner_dest_x, corner_dest_y in corners:
+            for corner_source_x, corner_source_y, corner_destination_x, corner_destination_y in corners:
                 pixel = source_document.pixelData(corner_source_x, corner_source_y, 1, 1)
                 
                 corner_block = pixel * (self._padding_size[0] * self._padding_size[1])
-                
-                destination_layer.setPixelData(corner_block, corner_dest_x, corner_dest_y, self._padding_size[0], self._padding_size[1])
+
+                destination_layer.setPixelData(corner_block, corner_destination_x, corner_destination_y, self._padding_size[0], self._padding_size[1])
     
     #endregion
