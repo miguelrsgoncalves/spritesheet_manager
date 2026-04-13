@@ -16,9 +16,9 @@ DEFAULTS: dict[str, any] = {
     "grid_size_auto_update": True,
     "padding_size": [8, 8],
     "padding_size_auto_update": True,
-    "anti_bleed": True,
-    "export_kra": False,
-    "export_image": True,
+    "is_anti_bleed": True,
+    "is_export_kra": False,
+    "is_export_image": True,
     "padded_file_suffix": "_padded"
 }
 
@@ -40,7 +40,8 @@ class PadderWidget(QWidget):
     #region functions
 
     def run_padder(self):
-        Padder.run(self._get_padder_arguments())
+        padder: Padder = Padder(self._get_padder_arguments())
+        padder.run()
     
     def _get_padder_arguments(self):
         return {
@@ -48,10 +49,10 @@ class PadderWidget(QWidget):
             "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
             "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
             "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
-            "anti_bleed": self._anti_bleed_input.isChecked(),
+            "is_anti_bleed": self._is_anti_bleed_input.isChecked(),
             "export_name": self._export_name_input.text(),
-            "export_kra": self._export_kra_input.isChecked(),
-            "export_image": self._export_image_input.isChecked(),
+            "is_export_kra": self._is_export_kra_input.isChecked(),
+            "is_export_image": self._is_export_image_input.isChecked(),
         }
 
     def refresh_ui(self):
@@ -179,11 +180,11 @@ class PadderWidget(QWidget):
         group : QGroupBox= QGroupBox("Options")
         options_layout: QVBoxLayout = QVBoxLayout()
 
-        self._anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
-        self._anti_bleed_input.setChecked(DEFAULTS.get("anti_bleed"))
-        self._anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
+        self._is_anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
+        self._is_anti_bleed_input.setChecked(DEFAULTS.get("is_anti_bleed"))
+        self._is_anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
 
-        options_layout.addWidget(self._anti_bleed_input)
+        options_layout.addWidget(self._is_anti_bleed_input)
 
         group.setLayout(options_layout)
         return group
@@ -196,14 +197,14 @@ class PadderWidget(QWidget):
         export_name_layout.addWidget(QLabel("File name"))
         self._export_name_input: QLineEdit = QLineEdit(self._get_default_padded_export_name())
         export_name_layout.addWidget(self._export_name_input)
-        self._export_kra_input: QCheckBox = QCheckBox("Save .kra")
-        self._export_kra_input.setChecked(False)
-        self._export_image_input: QCheckBox = QCheckBox("Export image")
-        self._export_image_input.setChecked(True)
+        self._is_export_kra_input: QCheckBox = QCheckBox("Save .kra")
+        self._is_export_kra_input.setChecked(False)
+        self._is_export_image_input: QCheckBox = QCheckBox("Export image")
+        self._is_export_image_input.setChecked(True)
 
         output_layout.addLayout(export_name_layout)
-        output_layout.addWidget(self._export_kra_input)
-        output_layout.addWidget(self._export_image_input)
+        output_layout.addWidget(self._is_export_kra_input)
+        output_layout.addWidget(self._is_export_image_input)
 
         group.setLayout(output_layout)
         return group
@@ -232,9 +233,9 @@ class PadderWidget(QWidget):
         self._padding_width_input.setValue(padding_width)
         self._padding_height_input.setValue(padding_height)
 
-        self._anti_bleed_input.setChecked(state.get("anti_bleed", DEFAULTS["anti_bleed"]))
-        self._export_kra_input.setChecked(state.get("export_kra", DEFAULTS["export_kra"]))
-        self._export_image_input.setChecked(state.get("export_image", DEFAULTS["export_image"]))
+        self._is_anti_bleed_input.setChecked(state.get("is_anti_bleed", DEFAULTS["is_anti_bleed"]))
+        self._is_export_kra_input.setChecked(state.get("is_export_kra", DEFAULTS["is_export_kra"]))
+        self._is_export_image_input.setChecked(state.get("is_export_image", DEFAULTS["is_export_image"]))
 
         self.refresh_ui()
 
@@ -250,9 +251,9 @@ class PadderWidget(QWidget):
             "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
             "grid_size": [self._grid_columns_input.value(), self._grid_rows_input.value()],
             "padding_size": [self._padding_width_input.value(), self._padding_height_input.value()],
-            "anti_bleed": self._anti_bleed_input.isChecked(),
-            "export_kra": self._export_kra_input.isChecked(),
-            "export_image": self._export_image_input.isChecked(),
+            "is_anti_bleed": self._is_anti_bleed_input.isChecked(),
+            "is_export_kra": self._is_export_kra_input.isChecked(),
+            "is_export_image": self._is_export_image_input.isChecked(),
         }
     
     #endregion

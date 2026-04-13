@@ -12,92 +12,102 @@ EXPORT_FILTERS = (
 )
 
 class Padder():
-    @staticmethod
-    def run(
-        document,
-        tile_size: list[int, int],
-        grid_size: list[int, int],
-        padding_size: list[int, int],
-        anti_bleed: bool,
-        export_name: str,
-        export_kra: bool,
-        export_image: bool
+    def __init__(
+            self,
+            document,
+            tile_size: list[int, int],
+            grid_size: list[int, int],
+            padding_size: list[int, int],
+            is_anti_bleed: bool,
+            export_name: str,
+            is_export_kra: bool,
+            is_export_image: bool
     ):
+        self._document = document
+        self._tile_size = tile_size
+        self._grid_size = grid_size
+        self._padding_size = padding_size
+        self._is_anti_bleed = is_anti_bleed
+        self._export_name = export_name
+        self._is_export_kra = is_export_kra
+        self._is_export_image = is_export_image
+    
+    def run(self):
+        stride_width: int = self._tile_size[0] + (self._padding_size[0] * 2)
+        stride_height: int = self._tile_size[1] + (self._padding_size[1] * 2)
 
-        stride_width = tile_size[0] + (padding_size[0] * 2)
-        stride_height = tile_size[1] + (padding_size[1] * 2)
+        padded_document_width: int = self._grid_size[0] * stride_width
+        padded_document_height: int = self._grid_size[1] * stride_height
 
-        padded_document_width = grid_size[0] * stride_width
-        padded_document_height = grid_size[1] * stride_height
-
-        # New document inherits colour settings from the source
-        new_kra = app.createDocument(
-            padded_document_width, padded_document_height, export_name,
-            document.colorModel(),
-            document.colorDepth(),
-            document.colorProfile(),
-            document.resolution()
+        padded_document = app.createDocument(
+            padded_document_width, padded_document_height,
+            self._export_name,
+            self._document.colorModel(),
+            self._document.colorDepth(),
+            self._document.colorProfile(),
+            self._document.resolution()
         )
 
-        # Remove the default blank layer Krita adds to every new document
-        root = new_kra.rootNode()
-        for child in root.childNodes():
-            root.removeChildNode(child)
+        root_layer = padded_document.root_layerNode()
+        for child in root_layer.childNodes():
+            root_layer.removeChildNode(child)
 
-        layer = new_kra.createNode("Padded Spritesheet", "paintlayer")
-        root.addChildNode(layer, None)
+        padded_layer = padded_document.createNode("Padded Spritesheet", "paintlayer")
+        root_layer.addChildNode(padded_layer, None)
 
-        source_width = document.width()
-        source_height = document.height()
+        for row in range(self._grid_size[1]):
+            for column in range(self._grid_size[0]):
+                source_x: int = column * self._tile_size[0]
+                source_y: int = row * self._tile_size[1]
+                destination_x: int = (column * stride_width) + self._padding_size[0]
+                destination_y: int = (row * stride_height) + self._padding_size[1]
 
-        # Copy each tile from the source into its padded position in the new document
-        for row in range(grid_size[1]):
-            for col in range(grid_size[0]):
-                source_x = col * tile_size[0]
-                source_y = row * tile_size[1]
+                tile_data = self._document.pixelData(
+                    self._document,
+                    source_x, source_y,
+                    self._tile_size[0], self._tile_size[1]
+                
+                )
+                padded_layer.setPixelData(
+                    padded_layer,
+                    tile_data,
+                    destination_x, destination_y,
+                    self._tile_size[0], self._tile_size[1]
+                )
 
-                if source_x >= source_width or source_y >= source_height:
-                    continue
-
-                dest_x = (col * stride_width) + padding_size[0]
-                dest_y = (row * stride_height) + padding_size[1]
-
-                tile_data = read_pixels(document, source_x, source_y, tile_size[0], tile_size[1])
-                write_pixels(layer, tile_data, dest_x, dest_y, tile_size[0], tile_size[1])
-
-                if anti_bleed and (padding_size[0] > 0 or padding_size[1] > 0):
-                    anti_bleed(
-                        document, layer,
+                if self._is_anti_bleed and (self._padding_size[0] > 0 or self._padding_size[1] > 0):
+                    self.anti_bleed(
+                        self._document,
+                        padded_layer,
                         source_x, source_y,
-                        dest_x, dest_y,
-                        tile_size[0], tile_size[1],
-                        padding_size[0], padding_size[1]
+                        destination_x, destination_y,
+                        self._tile_size[0], self._tile_size[1],
+                        self._padding_size[0], self._padding_size[1]
                     )
 
-        new_kra.refreshProjection()
+        padded_document.refreshProjection()
 
-        original_path = document.fileexport_name()
-        folder = os.path.direxport_name(original_path) if original_path else ""
+        source_path = document.fileName()
+        folder = os.path.direxport_name(source_path) if source_path else ""
 
         # Only open the document in Krita when keeping the .kra file
-        if export_kra:
-            app.activeWindow().addView(new_kra)
+        if is_export_kra:
+            app.activeWindow().addView(padded_document)
             if folder:
                 kra_path = os.path.join(folder, export_name + ".kra")
-                new_kra.setFileexport_name(kra_path)
-                new_kra.save()
+                padded_document.setFileexport_name(kra_path)
+                padded_document.save()
 
-        if export_image:
-            _export_with_dialog(new_kra, folder, export_name)
+        if is_export_image:
+            _export_with_dialog(padded_document, folder, export_name)
 
         # If not keeping the .kra, close the temporary document
-        if not export_kra:
-            new_kra.close()
+        if not is_export_kra:
+            padded_document.close()
 
-        return new_kra
+        return padded_document
 
-    @staticmethod
-    def _export_with_dialog(doc, default_folder, default_export_name):
+    def _export_with_dialog(self, doc, default_folder, default_export_name):
         default_path = os.path.join(default_folder, default_export_name + ".png") if default_folder else default_export_name + ".png"
 
         export_path, _ = QFileDialog.getSaveFileexport_name(
@@ -112,8 +122,7 @@ class Padder():
 
         doc.exportImage(export_path, InfoObject())
     
-    @staticmethod
-    def anti_bleed(source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
+    def anti_bleed(self, source_doc, dest_layer, source_x, source_y, dest_x, dest_y,
                         tile_size[0], tile_size[1], padding_size[0], padding_size[1]):
 
         # Top and bottom edge bands
