@@ -1,11 +1,15 @@
 from krita import Krita
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 from ...core.padder import Padder
 from ...ui.widgets import LinkButton
 
 MAX_INT = 2147483647
+PREVIEW_TIMER_INTERVAL = 1000
+PREVIEW_ASPECT_RATIO = 16 / 9
+PREVIEW_WINDOW_SIZE = [480, 270, 640, 360]
 
 WIDGET_KEY: str = "PADDER"
 WIDGET_DESCRIPTION: str = "Padder settings"
@@ -27,8 +31,13 @@ class PadderWidget(QWidget):
         super().__init__()
         self._document: any = document
 
+        self._preview_timer: QTimer = QTimer()
+        self._preview_timer.setSingleShot(True)
+        self._preview_timer.timeout.connect(self._update_preview)
+
         layout: QVBoxLayout = QVBoxLayout()
 
+        layout.addWidget(self._build_preview_group())
         layout.addWidget(self._build_padding_settings_group())
         layout.addWidget(self._build_options_group())
         layout.addWidget(self._build_output_group())
@@ -60,12 +69,60 @@ class PadderWidget(QWidget):
         self._on_grid_auto_update_toggled()
         self._on_padding_auto_update_toggled()
     
+    def _update_preview(self):
+        padder_arguments = self._get_padder_arguments()
+        padder: Padder = Padder(**padder_arguments)
+        preview_document = padder.run(True)
+
+        if preview_document:
+            q_image = preview_document.thumbnail(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
+            preview_document.close()
+
+            self._preview_window.setPixmap(QPixmap.fromImage(q_image))
+            
+            final_width: int = padder_arguments["grid_size"][0] * padder_arguments["tile_size"][0] + (padder_arguments["padding_size"][0] * 2)
+            final_height: int = padder_arguments["grid_size"][1] * padder_arguments["tile_size"][1] + (padder_arguments["padding_size"][1] * 2)
+            self._preview_label.setText(f"Export Resolution: {final_width}x{final_height} px")
+
+    
     def _get_default_padded_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
     
     #endregion
 
     #region groups
+
+    def _build_preview_group(self):
+        group: QWidget = QWidget()
+        
+        preview_layout: QVBoxLayout = QVBoxLayout(group)
+        preview_layout.setAlignment(Qt.AlignCenter)
+        preview_layout.addStretch(1)
+
+        self._preview_window: QLabel = QLabel()
+        self._preview_window.setMinimumSize(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
+        self._preview_window.setMaximumSize(PREVIEW_WINDOW_SIZE[2], PREVIEW_WINDOW_SIZE[3])
+        
+        self._preview_window.setSizePolicy(
+            self._preview_window.sizePolicy().Expanding,
+            self._preview_window.sizePolicy().Expanding
+        )
+        self._preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._preview_window.setStyleSheet("""
+            QLabel {
+                background-color: #313131;
+                border-radius: 4px;
+            }"""
+        )
+
+        self._preview_label: QLabel = QLabel("Export Resolution: 0x0 px")
+        self._preview_label.setAlignment(Qt.AlignCenter)
+        self._preview_label.setToolTip("The preview image is scaled down, resulting in a lower quality image and padding logic. The exported image will have full resolution.")
+
+        preview_layout.addWidget(self._preview_window)
+        preview_layout.addWidget(self._preview_label)
+
+        return group
 
     def _build_padding_settings_group(self):
         group: QGroupBox = QGroupBox("Padding Settings")
@@ -80,11 +137,13 @@ class PadderWidget(QWidget):
         self._tile_width_input.setRange(1, MAX_INT)
         self._tile_width_input.setValue(DEFAULTS.get("tile_size")[0])
         self._tile_width_input.valueChanged.connect(self._on_tile_size_changed)
+        self._tile_width_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._tile_height_input: QSpinBox = QSpinBox()
         self._tile_height_input.setRange(1, MAX_INT)
         self._tile_height_input.setValue(DEFAULTS.get("tile_size")[1])
         self._tile_height_input.valueChanged.connect(self._on_tile_size_changed)
+        self._tile_height_input.valueChanged.connect(self._on_padder_argument_changed)
 
         self._tile_size_link_button: LinkButton = LinkButton()
         self._tile_size_link_button.setToolTip("Link values")
@@ -108,11 +167,13 @@ class PadderWidget(QWidget):
         self._grid_columns_input.setRange(1, MAX_INT)
         self._grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
         self._grid_columns_input.valueChanged.connect(self._on_grid_size_changed)
+        self._grid_columns_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._grid_rows_input: QSpinBox = QSpinBox()
         self._grid_rows_input.setRange(1, MAX_INT)
         self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
         self._grid_rows_input.valueChanged.connect(self._on_grid_size_changed)
+        self._grid_rows_input.valueChanged.connect(self._on_padder_argument_changed)
 
         self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
         self._grid_size_auto_update_checkbox.setChecked(DEFAULTS.get("grid_size_auto_update"))
@@ -142,11 +203,13 @@ class PadderWidget(QWidget):
         self._padding_width_input.setRange(1, MAX_INT)
         self._padding_width_input.setValue(DEFAULTS.get("padding_size")[0])
         self._padding_width_input.valueChanged.connect(self._on_padding_size_changed)
+        self._padding_width_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._padding_height_input: QSpinBox = QSpinBox()
         self._padding_height_input.setRange(1, MAX_INT)
         self._padding_height_input.setValue(DEFAULTS.get("padding_size")[1])
         self._padding_height_input.valueChanged.connect(self._on_padding_size_changed)
+        self._padding_height_input.valueChanged.connect(self._on_padder_argument_changed)
 
         self._padding_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
         self._padding_size_auto_update_checkbox.setChecked(DEFAULTS.get("padding_size_auto_update"))
@@ -183,6 +246,7 @@ class PadderWidget(QWidget):
         self._is_anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
         self._is_anti_bleed_input.setChecked(DEFAULTS.get("is_anti_bleed"))
         self._is_anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
+        self._is_anti_bleed_input.toggled.connect(self._on_padder_argument_changed)
 
         options_layout.addWidget(self._is_anti_bleed_input)
 
@@ -259,6 +323,9 @@ class PadderWidget(QWidget):
     #endregion
 
     #region signals
+
+    def _on_padder_argument_changed(self):
+        self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
     
     def _on_tile_size_changed(self):
         if self._tile_size_link_button.is_linked():
@@ -346,7 +413,9 @@ class PadderDialog:
 
         layout.addWidget(padder_widget)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        layout.addStretch(1)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         buttons.button(QDialogButtonBox.Ok).setText("Apply Padding")
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)

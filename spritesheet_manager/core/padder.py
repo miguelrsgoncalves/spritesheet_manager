@@ -9,6 +9,8 @@ EXPORT_FILTERS = (
     "BMP Image (*.bmp)"
 )
 
+PREVIEW_RESOLUTION_SCALING = 0.15
+
 class Padder():
     def __init__(
             self,
@@ -30,8 +32,25 @@ class Padder():
         self._is_export_kra = is_export_kra
         self._is_export_image = is_export_image
     
-    def run(self):
+    def run(self, is_preview = False):
         krita = Krita.instance()
+
+        #region preview_scaling
+
+        if is_preview:
+            self._document = self._document.clone()
+            
+            self._document.scaleImage(
+                int(self._document.width() * PREVIEW_RESOLUTION_SCALING), 
+                int(self._document.height() * PREVIEW_RESOLUTION_SCALING), 
+                16, 16,
+                "Box"
+            )
+            
+            self._tile_size = [max(1, int(x * PREVIEW_RESOLUTION_SCALING)) for x in self._tile_size]
+            self._padding_size = [int(x * PREVIEW_RESOLUTION_SCALING) for x in self._padding_size]
+
+        #endregion
 
         stride_width: int = self._tile_size[0] + (self._padding_size[0] * 2)
         stride_height: int = self._tile_size[1] + (self._padding_size[1] * 2)
@@ -83,6 +102,9 @@ class Padder():
                     )
 
         padded_document.refreshProjection()
+
+        if is_preview:
+            return padded_document
 
         source_path: str = self._document.fileName()
         source_folder: str = os.path.dirname(source_path)
