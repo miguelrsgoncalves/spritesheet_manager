@@ -7,8 +7,9 @@ class AnimationExporterWidget(QWidget):
         super().__init__()
         self._document = document
     
-    def run_animation_exporter():
-        pass
+    def run_animation_exporter(self):
+        animation_exporter: AnimationExporter = AnimationExporter(self._document)
+        animation_exporter.run()
 
 class AnimationExporterDialog(QDialog):
     def __init__(self):
