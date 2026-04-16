@@ -415,7 +415,7 @@ class PadderDialog:
 
         layout.addStretch(1)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+        buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         buttons.button(QDialogButtonBox.Ok).setText("Apply Padding")
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
