@@ -1,6 +1,6 @@
 from krita import Krita
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 from ...core.padder import Padder
@@ -29,7 +29,7 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     def __init__(self, document):
         super().__init__()
-        self._document: any = document
+        self._document = document
 
         self._preview_timer: QTimer = QTimer()
         self._preview_timer.setSingleShot(True)
@@ -52,7 +52,7 @@ class PadderWidget(QWidget):
         padder: Padder = Padder(**self._get_padder_arguments())
         padder.run()
     
-    def _get_padder_arguments(self):
+    def _get_padder_arguments(self) -> dict[str, any]:
         return {
             "document": self._document,
             "tile_size": [self._tile_width_input.value(), self._tile_height_input.value()],
@@ -70,12 +70,12 @@ class PadderWidget(QWidget):
         self._on_padding_auto_update_toggled()
     
     def _update_preview(self):
-        padder_arguments = self._get_padder_arguments()
+        padder_arguments: dict[str, any] = self._get_padder_arguments()
         padder: Padder = Padder(**padder_arguments)
         preview_document = padder.run(True)
 
         if preview_document:
-            q_image = preview_document.thumbnail(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
+            q_image: QImage = preview_document.thumbnail(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
             preview_document.close()
 
             self._preview_window.setPixmap(QPixmap.fromImage(q_image))
@@ -97,7 +97,6 @@ class PadderWidget(QWidget):
         
         preview_layout: QVBoxLayout = QVBoxLayout(group)
         preview_layout.setAlignment(Qt.AlignCenter)
-        preview_layout.addStretch(1)
 
         self._preview_window: QLabel = QLabel()
         self._preview_window.setMinimumSize(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
@@ -408,7 +407,7 @@ class PadderDialog:
 
         layout: QVBoxLayout = QVBoxLayout()
 
-        document: any = Krita.instance().activeDocument()
+        document = Krita.instance().activeDocument()
         padder_widget: PadderWidget = PadderWidget(document)
 
         layout.addWidget(padder_widget)
