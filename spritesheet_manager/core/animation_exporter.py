@@ -89,3 +89,27 @@ class AnimationExporter:
             animation_layer.setPixelData(pixel_data, destination_x, destination_y, frame_width, frame_height)
 
         animation_document.refreshProjection()
+        
+        #region export
+
+        source_path: str = self._document.fileName()
+        source_folder: str = os.path.dirname(source_path)
+
+        if self._is_export_kra:
+            krita.activeWindow().addView(animation_document)
+            if source_folder:
+                kra_path: str = os.path.join(source_folder, self._export_name + ".kra")
+                animation_document.setFileName(kra_path)
+                animation_document.save()
+
+        if self._is_export_image:
+            image_path: str = os.path.join(source_folder, self._export_name + ".png")
+            animation_document.exportImage(image_path, InfoObject())
+        
+        #endregion
+            
+        self._document.setBatchmode(False)
+        
+        if not self._is_export_kra:
+            animation_document.close()
+            animation_document.setBatchmode(False)
