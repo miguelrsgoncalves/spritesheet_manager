@@ -66,3 +66,26 @@ class AnimationExporter:
 
         self._document.setBatchmode(True)
         animation_document.setBatchmode(True)
+
+        frame_list: list[int] = list(range(self._start_frame, self._end_frame + 1, self._step))
+
+        for index, frame_index in enumerate(frame_list):
+            self._document.setCurrentTime(frame_index)
+            self._document.waitForDone()
+            
+            pixel_data = self._document.pixelData(0, 0, frame_width, frame_height)
+            
+            destination_x: int
+            destination_y: int
+            
+            match self._packing_type:
+                case self.PackingType.Horizontal:
+                    destination_x = (index % self._columns) * frame_width
+                    destination_y = (index // self._columns) * frame_height
+                case self.PackingType.Vertical:
+                    destination_x = (index // self._rows) * frame_width
+                    destination_y = (index % self._rows) * frame_height
+            
+            animation_layer.setPixelData(pixel_data, destination_x, destination_y, frame_width, frame_height)
+
+        animation_document.refreshProjection()
