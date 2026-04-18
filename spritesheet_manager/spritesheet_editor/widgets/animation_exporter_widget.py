@@ -18,7 +18,7 @@ class AnimationExporterDialog(QDialog):
 
         layout: QVBoxLayout = QVBoxLayout()
 
-        document: any = Krita.instance().activeDocument()
+        document = Krita.instance().activeDocument()
         animation_exporter_widget: AnimationExporterWidget = AnimationExporterWidget(document)
 
         layout.addWidget(animation_exporter_widget)
