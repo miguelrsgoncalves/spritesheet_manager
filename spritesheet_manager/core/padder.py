@@ -1,13 +1,5 @@
 import os
-from krita import InfoObject
-
-EXPORT_FILTERS = (
-    "PNG Image (*.png);;"
-    "JPEG Image (*.jpg *.jpeg);;"
-    "WebP Image (*.webp);;"
-    "TIFF Image (*.tiff *.tif);;"
-    "BMP Image (*.bmp)"
-)
+from krita import Krita, InfoObject
 
 PREVIEW_RESOLUTION_SCALING = 0.15
 
@@ -32,7 +24,7 @@ class Padder():
         self._is_export_kra = is_export_kra
         self._is_export_image = is_export_image
     
-    def run(self, is_preview = False):
+    def run(self, is_preview: bool = False):
         krita = Krita.instance()
 
         #region preview_scaling
@@ -105,6 +97,8 @@ class Padder():
 
         if is_preview:
             return padded_document
+        
+        #region export
 
         source_path: str = self._document.fileName()
         source_folder: str = os.path.dirname(source_path)
@@ -118,8 +112,9 @@ class Padder():
 
         if self._is_export_image:
             image_path: str = os.path.join(source_folder, self._export_name + ".png")
-
             padded_document.exportImage(image_path, InfoObject())
+        
+        #endregion
 
         if not self._is_export_kra:
             padded_document.close()
