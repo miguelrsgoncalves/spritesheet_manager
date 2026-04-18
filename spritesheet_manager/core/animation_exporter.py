@@ -37,9 +37,16 @@ class AnimationExporter:
 
     def run(self):
         if not self._document: return
+            self._tile_size = [max(1, int(x * PREVIEW_RESOLUTION_SCALING)) for x in self._tile_size]
+            self._padding_size = [int(x * PREVIEW_RESOLUTION_SCALING) for x in self._padding_size]
+
+        #endregion
+
+        frame_width: int = self._document.width()
+        frame_height: int = self._document.height()
         
-        animation_document_width: int = self._document.width() * self._columns
-        animation_document_height: int = self._document.height() * self._rows
+        animation_document_width: int = frame_width * self._columns
+        animation_document_height: int = frame_height * self._rows
         
         animation_document = krita.createDocument(
             animation_document_width, animation_document_height,
@@ -56,3 +63,6 @@ class AnimationExporter:
 
         animation_layer = animation_document.createNode("Animation Spritesheet", "paintlayer")
         root_layer.addChildNode(animation_layer, None)
+
+        self._document.setBatchmode(True)
+        animation_document.setBatchmode(True)
