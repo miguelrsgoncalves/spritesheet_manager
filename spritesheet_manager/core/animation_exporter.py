@@ -49,9 +49,6 @@ class AnimationExporter:
                 16, 16,
                 "Box"
             )
-            
-            self._tile_size = [max(1, int(x * PREVIEW_RESOLUTION_SCALING)) for x in self._tile_size]
-            self._padding_size = [int(x * PREVIEW_RESOLUTION_SCALING) for x in self._padding_size]
 
         #endregion
 
