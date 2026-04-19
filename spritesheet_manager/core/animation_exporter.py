@@ -85,11 +85,11 @@ class AnimationExporter:
             
             pixel_data = self._document.pixelData(0, 0, frame_width, frame_height)
             
-            destination_x: int
-            destination_y: int
+            destination_x: int = 0
+            destination_y: int = 0
             
             match self._packing_type:
-                case self.PackingType.HORIZONTAL:
+                case self.PackingType.HORIZONTAL | self.PackingType.SQUARE:
                     destination_x = (index % self._columns) * frame_width
                     destination_y = (index // self._columns) * frame_height
                 case self.PackingType.VERTICAL:
