@@ -1,10 +1,9 @@
 from krita import Krita
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QComboBox
+from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QComboBox, QPushButton
 from ...core.serializer import Serializer
 from ...core.animation_exporter import AnimationExporter
-from ...ui.widgets import LinkButton
 import math
 
 MAX_INT = 2147483647
