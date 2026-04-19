@@ -92,10 +92,10 @@ class AnimationExporter:
             destination_y: int
             
             match self._packing_type:
-                case self.PackingType.Horizontal:
+                case self.PackingType.HORIZONTAL:
                     destination_x = (index % self._columns) * frame_width
                     destination_y = (index // self._columns) * frame_height
-                case self.PackingType.Vertical:
+                case self.PackingType.VERTICAL:
                     destination_x = (index // self._rows) * frame_width
                     destination_y = (index % self._rows) * frame_height
             
