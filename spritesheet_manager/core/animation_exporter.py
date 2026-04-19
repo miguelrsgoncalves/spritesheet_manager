@@ -77,7 +77,7 @@ class AnimationExporter:
         self._document.setBatchmode(True)
         animation_document.setBatchmode(True)
 
-        frame_list: list[int] = list(range(self._start_frame, self._end_frame + 1, self._step))
+        frame_list: list[int] = list(range(self._start_frame, self._end_frame + 1, self._frame_step))
 
         for index, frame_index in enumerate(frame_list):
             self._document.setCurrentTime(frame_index)
