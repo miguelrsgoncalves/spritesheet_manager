@@ -402,6 +402,7 @@ class PadderWidget(QWidget):
 
 class PadderDialog:
     def __init__(self):
+        super().__init__()
         dialog: QDialog = QDialog()
         dialog.setWindowTitle("Spritesheet Editor: Padder")
 
