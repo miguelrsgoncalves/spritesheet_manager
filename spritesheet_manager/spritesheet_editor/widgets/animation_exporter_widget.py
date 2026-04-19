@@ -45,6 +45,8 @@ class AnimationExporterWidget(QWidget):
 
         self.refresh_ui()
     
+    #region functions
+    
     def run_animation_exporter(self):
         animation_exporter: AnimationExporter = AnimationExporter(**self._get_animation_exporter_arguments())
         animation_exporter.run()
@@ -68,8 +70,11 @@ class AnimationExporterWidget(QWidget):
     def refresh_ui(self):
         self._on_grid_auto_update_toggled()
         self._on_exporter_argument_changed()
-    
+
     def _update_preview(self):
+        self._preview_window.clear()
+        self._preview_status_label.setText("Updating preview...")
+
         animation_exporter_arguments: dict[str, any] = self._get_animation_exporter_arguments()
         exporter: AnimationExporter = AnimationExporter(**animation_exporter_arguments)
         preview_document, final_width, final_height = exporter.run(True)
@@ -80,12 +85,14 @@ class AnimationExporterWidget(QWidget):
 
             self._preview_window.setPixmap(QPixmap.fromImage(q_image))
             self._preview_label.setText(f"Export Resolution: {final_width}x{final_height} px")
+
+        self._preview_status_label.setText("")
     
     def _get_default_animation_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("animation_file_suffix") if self._document else "Animation Spritesheet"
     
     #endregion
-
+    
     #region groups
 
     def _build_preview_group(self):
@@ -112,10 +119,25 @@ class AnimationExporterWidget(QWidget):
 
         self._preview_label: QLabel = QLabel("Export Resolution: 0x0 px")
         self._preview_label.setAlignment(Qt.AlignCenter)
-        self._preview_label.setToolTip("The preview image is scaled down, resulting in a lower quality image. The exported image will have full resolution.")
+        self._preview_label.setToolTip("The preview image is scaled down, resulting in a lower quality image.")
+
+        controls_layout: QHBoxLayout = QHBoxLayout()
+        self._preview_status_label: QLabel = QLabel("Preview up to date.")
+        
+        self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
+        self._auto_update_preview_checkbox.setChecked(True)
+        self._auto_update_preview_checkbox.toggled.connect(self._on_exporter_argument_changed)
+
+        self._manual_update_button: QPushButton = QPushButton("Update Now")
+        self._manual_update_button.clicked.connect(self._update_preview)
+
+        controls_layout.addWidget(self._preview_status_label)
+        controls_layout.addWidget(self._auto_update_preview_checkbox)
+        controls_layout.addWidget(self._manual_update_button)
 
         preview_layout.addWidget(self._preview_window)
         preview_layout.addWidget(self._preview_label)
+        preview_layout.addLayout(controls_layout)
 
         return group
 
@@ -124,6 +146,7 @@ class AnimationExporterWidget(QWidget):
         animation_exporter_settings_layout: QHBoxLayout = QHBoxLayout()
 
         #region frame_settings
+
         frame_settings_layout: QGridLayout = QGridLayout()
         frame_settings_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -149,9 +172,11 @@ class AnimationExporterWidget(QWidget):
         frame_settings_layout.addWidget(self._end_frame_input, 2, 1)
         frame_settings_layout.addWidget(QLabel("Step:"), 3, 0, Qt.AlignmentFlag.AlignRight)
         frame_settings_layout.addWidget(self._frame_step_input, 3, 1)
+
         #endregion
 
         #region grid_size
+
         grid_size_layout: QGridLayout = QGridLayout()
         grid_size_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -175,19 +200,15 @@ class AnimationExporterWidget(QWidget):
         self._grid_size_auto_update_checkbox.setToolTip("Auto-calculate columns and rows based on frames and packing type.")
         self._grid_size_auto_update_checkbox.toggled.connect(self._on_grid_auto_update_toggled)
 
-        self._grid_size_link_button: LinkButton = LinkButton()
-        self._grid_size_link_button.setToolTip("Link values")
-        self._grid_size_link_button.link_changed.connect(self._on_grid_size_changed)
-
-        grid_size_layout.addWidget(QLabel("Layout Strategy"), 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
+        grid_size_layout.addWidget(QLabel("Layout Strategy"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
         grid_size_layout.addWidget(QLabel("Packing:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         grid_size_layout.addWidget(self._packing_type_input, 1, 1)
         grid_size_layout.addWidget(QLabel("Columns:"), 2, 0, Qt.AlignmentFlag.AlignRight)
         grid_size_layout.addWidget(self._grid_columns_input, 2, 1)
         grid_size_layout.addWidget(QLabel("Rows:"), 3, 0, Qt.AlignmentFlag.AlignRight)
         grid_size_layout.addWidget(self._grid_rows_input, 3, 1)
-        grid_size_layout.addWidget(self._grid_size_link_button, 2, 3, 2, 3, Qt.AlignmentFlag.AlignVCenter)
-        grid_size_layout.addWidget(self._grid_size_auto_update_checkbox, 4, 0, 1, 3, Qt.AlignmentFlag.AlignLeft)
+        grid_size_layout.addWidget(self._grid_size_auto_update_checkbox, 4, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
+
         #endregion
 
         animation_exporter_settings_layout.addLayout(frame_settings_layout)
@@ -208,11 +229,9 @@ class AnimationExporterWidget(QWidget):
         
         self._is_export_kra_input: QCheckBox = QCheckBox("Save .kra")
         self._is_export_kra_input.setChecked(DEFAULTS.get("is_export_kra"))
-        self._is_export_kra_input.toggled.connect(self._on_exporter_argument_changed)
 
         self._is_export_image_input: QCheckBox = QCheckBox("Export image")
         self._is_export_image_input.setChecked(DEFAULTS.get("is_export_image"))
-        self._is_export_image_input.toggled.connect(self._on_exporter_argument_changed)
 
         output_layout.addLayout(export_name_layout)
         output_layout.addWidget(self._is_export_kra_input)
@@ -272,7 +291,12 @@ class AnimationExporterWidget(QWidget):
     #region signals
 
     def _on_exporter_argument_changed(self):
-        self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
+        self._preview_window.clear()
+        self._preview_window.setText("Preview out of date")
+
+        if self._auto_update_preview_checkbox.isChecked():
+            self._preview_status_label.setText("Preview update scheduled")
+            self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
     
     def _on_frames_changed(self):
         if self._start_frame_input.value() > self._end_frame_input.value():
@@ -288,23 +312,23 @@ class AnimationExporterWidget(QWidget):
             total_frames = max(1, ((end - start) // step) + 1)
             packing = self._packing_type_input.currentIndex()
 
-            cols = 1
+            columns = 1
             rows = 1
 
             if packing == 0:
-                cols = total_frames
+                columns = total_frames
                 rows = 1
             elif packing == 1:
-                cols = 1
+                columns = 1
                 rows = total_frames
             elif packing == 2:
-                cols = max(1, math.ceil(math.sqrt(total_frames)))
-                rows = max(1, math.ceil(total_frames / cols))
+                columns = max(1, math.ceil(math.sqrt(total_frames)))
+                rows = max(1, math.ceil(total_frames / columns))
             
             self._grid_columns_input.blockSignals(True)
             self._grid_rows_input.blockSignals(True)
             
-            self._grid_columns_input.setValue(cols)
+            self._grid_columns_input.setValue(columns)
             self._grid_rows_input.setValue(rows)
             
             self._grid_columns_input.blockSignals(False)
@@ -313,15 +337,28 @@ class AnimationExporterWidget(QWidget):
         self._on_exporter_argument_changed()
     
     def _on_grid_size_changed(self):
-        if not self._grid_size_auto_update_checkbox.isChecked() and self._grid_size_link_button.is_linked():
+        if not self._grid_size_auto_update_checkbox.isChecked():
             sender = self.sender()
+            
+            start = self._start_frame_input.value()
+            end = self._end_frame_input.value()
+            step = self._frame_step_input.value()
+            total_frames = max(1, ((end - start) // step) + 1)
+
             if sender == self._grid_columns_input:
+                columns = self._grid_columns_input.value()
+                calculated_rows = max(1, math.ceil(total_frames / columns))
+                
                 self._grid_rows_input.blockSignals(True)
-                self._grid_rows_input.setValue(self._grid_columns_input.value())
+                self._grid_rows_input.setValue(calculated_rows)
                 self._grid_rows_input.blockSignals(False)
-            else:
+                
+            elif sender == self._grid_rows_input:
+                rows = self._grid_rows_input.value()
+                calculated_columns = max(1, math.ceil(total_frames / rows))
+                
                 self._grid_columns_input.blockSignals(True)
-                self._grid_columns_input.setValue(self._grid_rows_input.value())
+                self._grid_columns_input.setValue(calculated_columns)
                 self._grid_columns_input.blockSignals(False)
         
         self._on_exporter_argument_changed()
@@ -330,7 +367,6 @@ class AnimationExporterWidget(QWidget):
         auto_update: bool = self._grid_size_auto_update_checkbox.isChecked()
         self._grid_columns_input.setEnabled(not auto_update)
         self._grid_rows_input.setEnabled(not auto_update)
-        self._grid_size_link_button.setEnabled(not auto_update)
 
         if auto_update:
             self._on_frames_changed()
