@@ -26,8 +26,22 @@ class AnimationExporterWidget(QWidget):
         self._document = document
     
     def run_animation_exporter(self):
-        animation_exporter: AnimationExporter = AnimationExporter(self._document)
+        animation_exporter: AnimationExporter = AnimationExporter(**self._get_animation_exporter_arguments())
         animation_exporter.run()
+    
+    def _get_animation_exporter_arguments(self) -> dict[str, any]:
+        return {
+            "document": self._document,
+            "export_name": self._export_name_input.text(),
+            "is_export_kra": self._is_export_kra_input.isChecked(),
+            "is_export_image": self._is_export_image_input.isChecked(),
+        }
+
+    def refresh_ui(self):
+        self._on_tile_size_changed()
+        self._on_grid_auto_update_toggled()
+        self._on_padding_auto_update_toggled()
+    
 
 class AnimationExporterDialog(QDialog):
     def __init__(self):
