@@ -6,10 +6,12 @@ from ...core.serializer import Serializer
 from ...core.animation_exporter import AnimationExporter
 import math
 
-MAX_INT = 2147483647
-PREVIEW_TIMER_INTERVAL = 1000
-PREVIEW_ASPECT_RATIO = 16 / 9
-PREVIEW_WINDOW_SIZE = [480, 270, 640, 360]
+MAX_INT: int = 2147483647
+PREVIEW_TIMER_INTERVAL: int = 1000
+PREVIEW_TIMER_TICK_INTERVAL: int = 10
+PREVIEW_TIMER_TICK_LABEL: str = "Refreshing preview in {:.3f} s"
+PREVIEW_ASPECT_RATIO: int = 16 / 9
+PREVIEW_WINDOW_SIZE: list[int] = [480, 270, 640, 360]
 
 WIDGET_KEY: str = "ANIMATION_EXPORTER"
 WIDGET_DESCRIPTION: str = "Animation Exporter settings"
@@ -31,8 +33,8 @@ class AnimationExporterWidget(QWidget):
         self._document = document
 
         self._preview_timer: QTimer = QTimer()
-        self._preview_timer.setSingleShot(True)
-        self._preview_timer.timeout.connect(self._update_preview)
+        self._preview_timer_interval: int = 0
+        self._preview_timer.timeout.connect(self._on_preview_timer_tick)
 
         layout: QVBoxLayout = QVBoxLayout()
 
@@ -290,7 +292,8 @@ class AnimationExporterWidget(QWidget):
         self._preview_window.setText("Preview out of date")
 
         if self._auto_update_preview_checkbox.isChecked():
-            self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
+            self._preview_timer_interval = PREVIEW_TIMER_INTERVAL
+            self._preview_timer.start(PREVIEW_TIMER_TICK_INTERVAL)
     
     def _on_frames_changed(self):
         if self._start_frame_input.value() > self._end_frame_input.value():
@@ -338,6 +341,16 @@ class AnimationExporterWidget(QWidget):
 
         if auto_update:
             self._on_frames_changed()
+    
+    def _on_preview_timer_tick(self):
+        self._preview_timer_interval -= PREVIEW_TIMER_TICK_INTERVAL
+
+        if self._preview_timer_interval > 0:
+            time = self._preview_timer_interval / 1000.0
+            self._preview_window.setText(PREVIEW_TIMER_TICK_LABEL.format(time))
+        else:
+            self._preview_timer.stop()
+            self._update_preview()
 
 class AnimationExporterDialog(QDialog):
     def __init__(self):
