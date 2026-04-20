@@ -1,13 +1,15 @@
 from krita import Krita
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QPushButton
 from ...core.serializer import Serializer
 from ...core.padder import Padder
 from ...ui.widgets import LinkButton
 
 MAX_INT: int = 2147483647
 PREVIEW_TIMER_INTERVAL: int = 1000
+PREVIEW_TIMER_TICK_INTERVAL: int = 10
+PREVIEW_TIMER_TICK_LABEL: str = "Refreshing preview in {:.3f} s"
 PREVIEW_ASPECT_RATIO: int = 16 / 9
 PREVIEW_WINDOW_SIZE: list[int] = [480, 270, 640, 360]
 
@@ -32,8 +34,8 @@ class PadderWidget(QWidget):
         self._document = document
 
         self._preview_timer: QTimer = QTimer()
-        self._preview_timer.setSingleShot(True)
-        self._preview_timer.timeout.connect(self._update_preview)
+        self._preview_timer_interval: int = 0
+        self._preview_timer.timeout.connect(self._on_preview_timer_tick)
 
         layout: QVBoxLayout = QVBoxLayout()
 
@@ -70,6 +72,9 @@ class PadderWidget(QWidget):
         self._on_padding_auto_update_toggled()
     
     def _update_preview(self):
+        self._preview_window.clear()
+        self._preview_window.setText("Rendering preview...")
+
         padder_arguments: dict[str, any] = self._get_padder_arguments()
         padder: Padder = Padder(**padder_arguments)
         preview_document = padder.run(True)
@@ -94,6 +99,18 @@ class PadderWidget(QWidget):
 
     def _build_preview_group(self):
         group: QWidget = QWidget()
+
+        preview_controls_layout: QHBoxLayout = QHBoxLayout()
+
+        self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
+        self._auto_update_preview_checkbox.setChecked(True)
+        self._auto_update_preview_checkbox.toggled.connect(self._on_padder_argument_changed)
+
+        self._preview_manual_update_button: QPushButton = QPushButton("Refresh")
+        self._preview_manual_update_button.clicked.connect(self._update_preview)
+
+        preview_controls_layout.addWidget(self._auto_update_preview_checkbox)
+        preview_controls_layout.addWidget(self._preview_manual_update_button)
         
         preview_layout: QVBoxLayout = QVBoxLayout(group)
         preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -115,9 +132,10 @@ class PadderWidget(QWidget):
         )
 
         self._preview_resolution_label: QLabel = QLabel("Export Resolution: 0x0 px")
-        self._preview_resolution_label.setAlignment(Qt.AlignCenter)
+        self._preview_resolution_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._preview_resolution_label.setToolTip("The preview image is scaled down, resulting in a lower quality image and padding logic. The exported image will have full resolution.")
 
+        preview_layout.addLayout(preview_controls_layout)
         preview_layout.addWidget(self._preview_window)
         preview_layout.addWidget(self._preview_resolution_label)
 
@@ -324,7 +342,12 @@ class PadderWidget(QWidget):
     #region signals
 
     def _on_padder_argument_changed(self):
-        self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
+        self._preview_window.clear()
+        self._preview_window.setText("Preview out of date")
+
+        if self._auto_update_preview_checkbox.isChecked():
+            self._preview_timer_interval = PREVIEW_TIMER_INTERVAL
+            self._preview_timer.start(PREVIEW_TIMER_TICK_INTERVAL)
     
     def _on_tile_size_changed(self):
         if self._tile_size_link_button.is_linked():
@@ -397,6 +420,16 @@ class PadderWidget(QWidget):
 
         if padding_auto_update == True:
             self._on_tile_size_changed()
+    
+    def _on_preview_timer_tick(self):
+        self._preview_timer_interval -= PREVIEW_TIMER_TICK_INTERVAL
+
+        if self._preview_timer_interval > 0:
+            time = self._preview_timer_interval / 1000.0
+            self._preview_window.setText(PREVIEW_TIMER_TICK_LABEL.format(time))
+        else:
+            self._preview_timer.stop()
+            self._update_preview()
 
     #endregion
 

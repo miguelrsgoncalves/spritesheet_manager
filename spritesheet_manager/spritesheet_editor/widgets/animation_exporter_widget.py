@@ -70,7 +70,7 @@ class AnimationExporterWidget(QWidget):
 
     def refresh_ui(self):
         self._on_grid_auto_update_toggled()
-        self._on_exporter_argument_changed()
+        self._on_animation_exporter_argument_changed()
 
     def _update_preview(self):
         self._preview_window.clear()
@@ -101,13 +101,13 @@ class AnimationExporterWidget(QWidget):
 
         self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
         self._auto_update_preview_checkbox.setChecked(True)
-        self._auto_update_preview_checkbox.toggled.connect(self._on_exporter_argument_changed)
+        self._auto_update_preview_checkbox.toggled.connect(self._on_animation_exporter_argument_changed)
 
-        self._manual_update_button: QPushButton = QPushButton("Refresh")
-        self._manual_update_button.clicked.connect(self._update_preview)
+        self._preview_manual_update_button: QPushButton = QPushButton("Refresh")
+        self._preview_manual_update_button.clicked.connect(self._update_preview)
 
         preview_controls_layout.addWidget(self._auto_update_preview_checkbox)
-        preview_controls_layout.addWidget(self._manual_update_button)
+        preview_controls_layout.addWidget(self._preview_manual_update_button)
         
         preview_layout: QVBoxLayout = QVBoxLayout(group)
         preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -287,7 +287,7 @@ class AnimationExporterWidget(QWidget):
 
     #region signals
 
-    def _on_exporter_argument_changed(self):
+    def _on_animation_exporter_argument_changed(self):
         self._preview_window.clear()
         self._preview_window.setText("Preview out of date")
 
@@ -329,10 +329,10 @@ class AnimationExporterWidget(QWidget):
             self._grid_columns_input.blockSignals(False)
             self._grid_rows_input.blockSignals(False)
 
-        self._on_exporter_argument_changed()
+        self._on_animation_exporter_argument_changed()
     
     def _on_grid_size_changed(self):        
-        self._on_exporter_argument_changed()
+        self._on_animation_exporter_argument_changed()
     
     def _on_grid_auto_update_toggled(self):
         auto_update: bool = self._grid_size_auto_update_checkbox.isChecked()
