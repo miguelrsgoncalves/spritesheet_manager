@@ -2,7 +2,7 @@ import os
 from krita import Krita, InfoObject
 from enum import Enum
 
-PREVIEW_RESOLUTION_SCALING = 0.15
+PREVIEW_RESOLUTION_SCALING = 0.35
 
 class AnimationExporter:
     class PackingType(Enum):

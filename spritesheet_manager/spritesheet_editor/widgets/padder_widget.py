@@ -82,7 +82,7 @@ class PadderWidget(QWidget):
             
             final_width: int = padder_arguments["grid_size"][0] * padder_arguments["tile_size"][0] + (padder_arguments["padding_size"][0] * 2)
             final_height: int = padder_arguments["grid_size"][1] * padder_arguments["tile_size"][1] + (padder_arguments["padding_size"][1] * 2)
-            self._preview_label.setText(f"Export Resolution: {final_width}x{final_height} px")
+            self._preview_resolution_label.setText(f"Export Resolution: {final_width}x{final_height} px")
 
     
     def _get_default_padded_export_name(self) -> str:
@@ -96,7 +96,7 @@ class PadderWidget(QWidget):
         group: QWidget = QWidget()
         
         preview_layout: QVBoxLayout = QVBoxLayout(group)
-        preview_layout.setAlignment(Qt.AlignCenter)
+        preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._preview_window: QLabel = QLabel()
         self._preview_window.setMinimumSize(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
@@ -114,12 +114,12 @@ class PadderWidget(QWidget):
             }"""
         )
 
-        self._preview_label: QLabel = QLabel("Export Resolution: 0x0 px")
-        self._preview_label.setAlignment(Qt.AlignCenter)
-        self._preview_label.setToolTip("The preview image is scaled down, resulting in a lower quality image and padding logic. The exported image will have full resolution.")
+        self._preview_resolution_label: QLabel = QLabel("Export Resolution: 0x0 px")
+        self._preview_resolution_label.setAlignment(Qt.AlignCenter)
+        self._preview_resolution_label.setToolTip("The preview image is scaled down, resulting in a lower quality image and padding logic. The exported image will have full resolution.")
 
         preview_layout.addWidget(self._preview_window)
-        preview_layout.addWidget(self._preview_label)
+        preview_layout.addWidget(self._preview_resolution_label)
 
         return group
 

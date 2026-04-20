@@ -72,7 +72,7 @@ class AnimationExporterWidget(QWidget):
 
     def _update_preview(self):
         self._preview_window.clear()
-        self._preview_status_label.setText("Updating preview...")
+        self._preview_window.setText("Rendering preview...")
 
         animation_exporter_arguments: dict[str, any] = self._get_animation_exporter_arguments()
         exporter: AnimationExporter = AnimationExporter(**animation_exporter_arguments)
@@ -83,9 +83,7 @@ class AnimationExporterWidget(QWidget):
             preview_document.close()
 
             self._preview_window.setPixmap(QPixmap.fromImage(q_image))
-            self._preview_label.setText(f"Export Resolution: {final_width}x{final_height} px")
-
-        self._preview_status_label.setText("")
+            self._preview_resolution_label.setText(f"Export Resolution: {final_width}x{final_height} px")
     
     def _get_default_animation_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("animation_file_suffix") if self._document else "Animation Spritesheet"
@@ -96,9 +94,21 @@ class AnimationExporterWidget(QWidget):
 
     def _build_preview_group(self):
         group: QWidget = QWidget()
+
+        preview_controls_layout: QHBoxLayout = QHBoxLayout()
+
+        self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
+        self._auto_update_preview_checkbox.setChecked(True)
+        self._auto_update_preview_checkbox.toggled.connect(self._on_exporter_argument_changed)
+
+        self._manual_update_button: QPushButton = QPushButton("Refresh")
+        self._manual_update_button.clicked.connect(self._update_preview)
+
+        preview_controls_layout.addWidget(self._auto_update_preview_checkbox)
+        preview_controls_layout.addWidget(self._manual_update_button)
         
         preview_layout: QVBoxLayout = QVBoxLayout(group)
-        preview_layout.setAlignment(Qt.AlignCenter)
+        preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._preview_window: QLabel = QLabel()
         self._preview_window.setMinimumSize(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
@@ -116,27 +126,13 @@ class AnimationExporterWidget(QWidget):
             }"""
         )
 
-        self._preview_label: QLabel = QLabel("Export Resolution: 0x0 px")
-        self._preview_label.setAlignment(Qt.AlignCenter)
-        self._preview_label.setToolTip("The preview image is scaled down, resulting in a lower quality image.")
+        self._preview_resolution_label: QLabel = QLabel("Export Resolution: 0x0 px")
+        self._preview_resolution_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._preview_resolution_label.setToolTip("The preview image is scaled down, resulting in a lower quality image.")
 
-        controls_layout: QHBoxLayout = QHBoxLayout()
-        self._preview_status_label: QLabel = QLabel("Preview up to date.")
-        
-        self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
-        self._auto_update_preview_checkbox.setChecked(True)
-        self._auto_update_preview_checkbox.toggled.connect(self._on_exporter_argument_changed)
-
-        self._manual_update_button: QPushButton = QPushButton("Refresh")
-        self._manual_update_button.clicked.connect(self._update_preview)
-
-        controls_layout.addWidget(self._preview_status_label)
-        controls_layout.addWidget(self._auto_update_preview_checkbox)
-        controls_layout.addWidget(self._manual_update_button)
-
+        preview_layout.addLayout(preview_controls_layout)
         preview_layout.addWidget(self._preview_window)
-        preview_layout.addWidget(self._preview_label)
-        preview_layout.addLayout(controls_layout)
+        preview_layout.addWidget(self._preview_resolution_label)
 
         return group
 
@@ -294,7 +290,6 @@ class AnimationExporterWidget(QWidget):
         self._preview_window.setText("Preview out of date")
 
         if self._auto_update_preview_checkbox.isChecked():
-            self._preview_status_label.setText("Preview update scheduled")
             self._preview_timer.start(PREVIEW_TIMER_INTERVAL)
     
     def _on_frames_changed(self):
