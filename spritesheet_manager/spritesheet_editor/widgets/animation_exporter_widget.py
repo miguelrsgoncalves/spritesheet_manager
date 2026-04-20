@@ -154,10 +154,9 @@ class AnimationExporterWidget(QWidget):
         self._start_frame_input.setValue(DEFAULTS.get("start_frame"))
         self._start_frame_input.valueChanged.connect(self._on_frames_changed)
         
-        animation_length: int = self._document.animationLength()
         self._end_frame_input: QSpinBox = QSpinBox()
         self._end_frame_input.setRange(0, MAX_INT)
-        self._end_frame_input.setValue(animation_length)
+        self._end_frame_input.setValue(self._document.animationLength())
         self._end_frame_input.valueChanged.connect(self._on_frames_changed)
 
         self._frame_step_input: QSpinBox = QSpinBox()
