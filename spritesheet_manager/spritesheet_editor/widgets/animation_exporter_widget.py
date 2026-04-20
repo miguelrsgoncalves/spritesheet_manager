@@ -52,7 +52,7 @@ class AnimationExporterWidget(QWidget):
         animation_exporter.run()
     
     def _get_animation_exporter_arguments(self) -> dict[str, any]:
-        packing_enum = list(AnimationExporter.PackingType)[self._packing_type_input.currentIndex()]
+        packing_type = list(AnimationExporter.PackingType)[self._packing_type_input.currentIndex()]
 
         return {
             "document": self._document,
@@ -61,7 +61,7 @@ class AnimationExporterWidget(QWidget):
             "frame_step": self._frame_step_input.value(),
             "columns": self._grid_columns_input.value(),
             "rows": self._grid_rows_input.value(),
-            "packing_type": packing_enum,
+            "packing_type": packing_type,
             "export_name": self._export_name_input.text(),
             "is_export_kra": self._is_export_kra_input.isChecked(),
             "is_export_image": self._is_export_image_input.isChecked(),
@@ -128,7 +128,7 @@ class AnimationExporterWidget(QWidget):
         self._auto_update_preview_checkbox.setChecked(True)
         self._auto_update_preview_checkbox.toggled.connect(self._on_exporter_argument_changed)
 
-        self._manual_update_button: QPushButton = QPushButton("Update Now")
+        self._manual_update_button: QPushButton = QPushButton("Refresh")
         self._manual_update_button.clicked.connect(self._update_preview)
 
         controls_layout.addWidget(self._preview_status_label)
