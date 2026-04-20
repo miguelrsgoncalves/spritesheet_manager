@@ -165,12 +165,12 @@ class AnimationExporterWidget(QWidget):
         self._frame_step_input.setValue(DEFAULTS.get("frame_step"))
         self._frame_step_input.valueChanged.connect(self._on_frames_changed)
 
-        frame_settings_layout.addWidget(QLabel("Timeline Setup"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
+        frame_settings_layout.addWidget(QLabel("Animation Settings"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
         frame_settings_layout.addWidget(QLabel("Start Frame:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         frame_settings_layout.addWidget(self._start_frame_input, 1, 1)
         frame_settings_layout.addWidget(QLabel("End Frame:"), 2, 0, Qt.AlignmentFlag.AlignRight)
         frame_settings_layout.addWidget(self._end_frame_input, 2, 1)
-        frame_settings_layout.addWidget(QLabel("Step:"), 3, 0, Qt.AlignmentFlag.AlignRight)
+        frame_settings_layout.addWidget(QLabel("Frame Step:"), 3, 0, Qt.AlignmentFlag.AlignRight)
         frame_settings_layout.addWidget(self._frame_step_input, 3, 1)
 
         #endregion
