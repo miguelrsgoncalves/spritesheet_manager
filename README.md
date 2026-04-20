@@ -2,3 +2,5 @@
 
 # UNDER CONSTRUCTION
 **The plugin is currently under heavy development for the v1.0.0 version**
+
+Alpha versions can be found under the releases, they include some of the plugin's functionalities and serve as testing versions.
