@@ -70,6 +70,7 @@ class PadderWidget(QWidget):
         self._on_tile_size_changed()
         self._on_grid_auto_update_toggled()
         self._on_padding_auto_update_toggled()
+        self._on_padder_argument_changed()
     
     def _update_preview(self):
         self._preview_window.clear()
