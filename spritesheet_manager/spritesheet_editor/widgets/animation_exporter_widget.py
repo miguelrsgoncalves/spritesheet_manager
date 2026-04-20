@@ -194,12 +194,12 @@ class AnimationExporterWidget(QWidget):
         self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
         self._grid_rows_input.valueChanged.connect(self._on_grid_size_changed)
 
-        self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-calculate Layout")
+        self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
         self._grid_size_auto_update_checkbox.setChecked(DEFAULTS.get("grid_size_auto_update"))
         self._grid_size_auto_update_checkbox.setToolTip("Auto-calculate columns and rows based on frames and packing type.")
         self._grid_size_auto_update_checkbox.toggled.connect(self._on_grid_auto_update_toggled)
 
-        grid_size_layout.addWidget(QLabel("Layout Strategy"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
+        grid_size_layout.addWidget(QLabel("Packing Layout"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
         grid_size_layout.addWidget(QLabel("Packing:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         grid_size_layout.addWidget(self._packing_type_input, 1, 1)
         grid_size_layout.addWidget(QLabel("Columns:"), 2, 0, Qt.AlignmentFlag.AlignRight)
@@ -311,8 +311,8 @@ class AnimationExporterWidget(QWidget):
             total_frames = max(1, ((end - start) // step) + 1)
             packing = self._packing_type_input.currentIndex()
 
-            columns = 1
-            rows = 1
+            columns: int = 1
+            rows: int = 1
 
             if packing == 0:
                 columns = total_frames
