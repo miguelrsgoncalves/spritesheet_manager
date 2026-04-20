@@ -6,10 +6,10 @@ from ...core.serializer import Serializer
 from ...core.padder import Padder
 from ...ui.widgets import LinkButton
 
-MAX_INT = 2147483647
-PREVIEW_TIMER_INTERVAL = 1000
-PREVIEW_ASPECT_RATIO = 16 / 9
-PREVIEW_WINDOW_SIZE = [480, 270, 640, 360]
+MAX_INT: int = 2147483647
+PREVIEW_TIMER_INTERVAL: int = 1000
+PREVIEW_ASPECT_RATIO: int = 16 / 9
+PREVIEW_WINDOW_SIZE: list[int] = [480, 270, 640, 360]
 
 WIDGET_KEY: str = "PADDER"
 WIDGET_DESCRIPTION: str = "Padder settings"
