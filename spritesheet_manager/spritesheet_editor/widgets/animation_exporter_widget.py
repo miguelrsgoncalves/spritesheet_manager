@@ -330,31 +330,7 @@ class AnimationExporterWidget(QWidget):
 
         self._on_exporter_argument_changed()
     
-    def _on_grid_size_changed(self):
-        if not self._grid_size_auto_update_checkbox.isChecked():
-            sender = self.sender()
-            
-            start = self._start_frame_input.value()
-            end = self._end_frame_input.value()
-            step = self._frame_step_input.value()
-            total_frames = max(1, ((end - start) // step) + 1)
-
-            if sender == self._grid_columns_input:
-                columns = self._grid_columns_input.value()
-                calculated_rows = max(1, math.ceil(total_frames / columns))
-                
-                self._grid_rows_input.blockSignals(True)
-                self._grid_rows_input.setValue(calculated_rows)
-                self._grid_rows_input.blockSignals(False)
-                
-            elif sender == self._grid_rows_input:
-                rows = self._grid_rows_input.value()
-                calculated_columns = max(1, math.ceil(total_frames / rows))
-                
-                self._grid_columns_input.blockSignals(True)
-                self._grid_columns_input.setValue(calculated_columns)
-                self._grid_columns_input.blockSignals(False)
-        
+    def _on_grid_size_changed(self):        
         self._on_exporter_argument_changed()
     
     def _on_grid_auto_update_toggled(self):
