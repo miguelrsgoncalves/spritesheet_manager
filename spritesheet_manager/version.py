@@ -1,1 +1,1 @@
-PLUGIN_VERSION: str = "1.0.0"
+PLUGIN_VERSION: str = "0.2.0"
