@@ -100,6 +100,8 @@ class AnimationExporter:
 
         animation_document.refreshProjection()
 
+        self._document.setBatchmode(False)
+
         if is_preview:
             return animation_document, animation_document_width, animation_document_height
         
@@ -121,7 +123,6 @@ class AnimationExporter:
         
         #endregion
             
-        self._document.setBatchmode(False)
         
         if not self._is_export_kra:
             animation_document.close()
