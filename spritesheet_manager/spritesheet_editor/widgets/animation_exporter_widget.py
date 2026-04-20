@@ -303,28 +303,26 @@ class AnimationExporterWidget(QWidget):
             end = self._end_frame_input.value()
             step = self._frame_step_input.value()
             
-            total_frames = max(1, ((end - start) // step) + 1)
-            packing = self._packing_type_input.currentIndex()
+            total_frames: int = max(1, ((end - start) // step) + 1)
+            packing_type: int = self._packing_type_input.currentIndex()
 
             columns: int = 1
             rows: int = 1
 
-            if packing == 0:
+            if packing_type == 0:
                 columns = total_frames
                 rows = 1
-            elif packing == 1:
+            elif packing_type == 1:
                 columns = 1
                 rows = total_frames
-            elif packing == 2:
+            elif packing_type == 2:
                 columns = max(1, math.ceil(math.sqrt(total_frames)))
                 rows = max(1, math.ceil(total_frames / columns))
             
             self._grid_columns_input.blockSignals(True)
             self._grid_rows_input.blockSignals(True)
-            
             self._grid_columns_input.setValue(columns)
             self._grid_rows_input.setValue(rows)
-            
             self._grid_columns_input.blockSignals(False)
             self._grid_rows_input.blockSignals(False)
 
