@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QPushButton
 from ...core.serializer import Serializer
 from ...core.padder import Padder
-from ...ui.widgets import LinkButton
+from ...core.widgets import LinkButton
 
 MAX_INT: int = 2147483647
 PREVIEW_TIMER_INTERVAL: int = 1000
