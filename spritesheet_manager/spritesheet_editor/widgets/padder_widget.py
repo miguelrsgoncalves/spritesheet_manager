@@ -4,14 +4,9 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QPushButton
 from ...core.serializer import Serializer
 from ...core.padder import Padder
-from ...core.widgets import LinkButton
+from ...core.widgets import PreviewWindow, LinkButton
 
 MAX_INT: int = 2147483647
-PREVIEW_TIMER_INTERVAL: int = 1000
-PREVIEW_TIMER_TICK_INTERVAL: int = 10
-PREVIEW_TIMER_TICK_LABEL: str = "Refreshing preview in {:.3f} s"
-PREVIEW_ASPECT_RATIO: int = 16 / 9
-PREVIEW_WINDOW_SIZE: list[int] = [480, 270, 640, 360]
 
 WIDGET_KEY: str = "PADDER"
 WIDGET_DESCRIPTION: str = "Padder settings"
@@ -34,13 +29,11 @@ class PadderWidget(QWidget):
 
         self._document = document
 
-        self._preview_timer: QTimer = QTimer()
-        self._preview_timer_interval: int = 0
-        self._preview_timer.timeout.connect(self._on_preview_timer_tick)
-
         layout: QVBoxLayout = QVBoxLayout()
 
-        layout.addWidget(self._build_preview_group())
+        self._preview_window: PreviewWindow = PreviewWindow(self._refresh_preview)
+
+        layout.addWidget(self._preview_window)
         layout.addWidget(self._build_padding_settings_group())
         layout.addWidget(self._build_options_group())
         layout.addWidget(self._build_output_group())
@@ -73,24 +66,20 @@ class PadderWidget(QWidget):
         self._on_padding_auto_update_toggled()
         self._on_padder_argument_changed()
     
-    def _update_preview(self):
-        self._preview_window.clear()
-        self._preview_window.setText("Rendering preview...")
-
+    def _refresh_preview(self):
         padder_arguments: dict[str, any] = self._get_padder_arguments()
-        padder: Padder = Padder(**padder_arguments)
-        preview_document = padder.run(True)
+        exporter: Padder = Padder(**padder_arguments)
+        preview_document = exporter.run(True)
+
+        final_width: int = padder_arguments["grid_size"][0] * padder_arguments["tile_size"][0] + (padder_arguments["padding_size"][0] * 2)
+        final_height: int = padder_arguments["grid_size"][1] * padder_arguments["tile_size"][1] + (padder_arguments["padding_size"][1] * 2)
 
         if preview_document:
-            q_image: QImage = preview_document.thumbnail(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
+            q_image = preview_document.thumbnail(480, 270)
             preview_document.close()
+            return q_image, final_width, final_height
 
-            self._preview_window.setPixmap(QPixmap.fromImage(q_image))
-            
-            final_width: int = padder_arguments["grid_size"][0] * padder_arguments["tile_size"][0] + (padder_arguments["padding_size"][0] * 2)
-            final_height: int = padder_arguments["grid_size"][1] * padder_arguments["tile_size"][1] + (padder_arguments["padding_size"][1] * 2)
-            self._preview_resolution_label.setText(f"Export Resolution: {final_width}x{final_height} px")
-
+        return None, 0, 0
     
     def _get_default_padded_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
@@ -98,50 +87,6 @@ class PadderWidget(QWidget):
     #endregion
 
     #region groups
-
-    def _build_preview_group(self):
-        group: QWidget = QWidget()
-
-        preview_controls_layout: QHBoxLayout = QHBoxLayout()
-
-        self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
-        self._auto_update_preview_checkbox.setChecked(True)
-        self._auto_update_preview_checkbox.toggled.connect(self._on_padder_argument_changed)
-
-        self._preview_manual_update_button: QPushButton = QPushButton("Refresh")
-        self._preview_manual_update_button.clicked.connect(self._update_preview)
-
-        preview_controls_layout.addWidget(self._auto_update_preview_checkbox)
-        preview_controls_layout.addWidget(self._preview_manual_update_button)
-        
-        preview_layout: QVBoxLayout = QVBoxLayout(group)
-        preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self._preview_window: QLabel = QLabel()
-        self._preview_window.setMinimumSize(PREVIEW_WINDOW_SIZE[0], PREVIEW_WINDOW_SIZE[1])
-        self._preview_window.setMaximumSize(PREVIEW_WINDOW_SIZE[2], PREVIEW_WINDOW_SIZE[3])
-        
-        self._preview_window.setSizePolicy(
-            self._preview_window.sizePolicy().Expanding,
-            self._preview_window.sizePolicy().Expanding
-        )
-        self._preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._preview_window.setStyleSheet("""
-            QLabel {
-                background-color: #313131;
-                border-radius: 4px;
-            }"""
-        )
-
-        self._preview_resolution_label: QLabel = QLabel("Export Resolution: 0x0 px")
-        self._preview_resolution_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._preview_resolution_label.setToolTip("The preview image is scaled down, resulting in a lower quality image and padding logic. The exported image will have full resolution.")
-
-        preview_layout.addLayout(preview_controls_layout)
-        preview_layout.addWidget(self._preview_window)
-        preview_layout.addWidget(self._preview_resolution_label)
-
-        return group
 
     def _build_padding_settings_group(self):
         group: QGroupBox = QGroupBox("Padding Settings")
@@ -344,12 +289,7 @@ class PadderWidget(QWidget):
     #region signals
 
     def _on_padder_argument_changed(self):
-        self._preview_window.clear()
-        self._preview_window.setText("Preview out of date")
-
-        if self._auto_update_preview_checkbox.isChecked():
-            self._preview_timer_interval = PREVIEW_TIMER_INTERVAL
-            self._preview_timer.start(PREVIEW_TIMER_TICK_INTERVAL)
+        self._preview_window.request_refresh()
     
     def _on_tile_size_changed(self):
         if self._tile_size_link_button.is_linked():
@@ -422,16 +362,6 @@ class PadderWidget(QWidget):
 
         if padding_auto_update == True:
             self._on_tile_size_changed()
-    
-    def _on_preview_timer_tick(self):
-        self._preview_timer_interval -= PREVIEW_TIMER_TICK_INTERVAL
-
-        if self._preview_timer_interval > 0:
-            time = self._preview_timer_interval / 1000.0
-            self._preview_window.setText(PREVIEW_TIMER_TICK_LABEL.format(time))
-        else:
-            self._preview_timer.stop()
-            self._update_preview()
 
     #endregion
 
