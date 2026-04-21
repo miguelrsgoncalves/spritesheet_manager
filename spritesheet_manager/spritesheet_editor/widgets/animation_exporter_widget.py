@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayou
 from ...core.serializer import Serializer
 from ...core.animation_exporter import AnimationExporter
 import math
+from ...core.widgets import PreviewWindow
 
 MAX_INT: int = 2147483647
 PREVIEW_TIMER_INTERVAL: int = 1000
@@ -30,6 +31,7 @@ DEFAULTS: dict[str, any] = {
 class AnimationExporterWidget(QWidget):
     def __init__(self, document):
         super().__init__()
+
         self._document = document
 
         self._preview_timer: QTimer = QTimer()
@@ -355,6 +357,7 @@ class AnimationExporterWidget(QWidget):
 class AnimationExporterDialog(QDialog):
     def __init__(self):
         super().__init__()
+
         self.setWindowTitle("Spritesheet Editor: Animation Exporter")
 
         layout: QVBoxLayout = QVBoxLayout()

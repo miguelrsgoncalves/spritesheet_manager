@@ -31,6 +31,7 @@ DEFAULTS: dict[str, any] = {
 class PadderWidget(QWidget):
     def __init__(self, document):
         super().__init__()
+
         self._document = document
 
         self._preview_timer: QTimer = QTimer()
@@ -437,6 +438,7 @@ class PadderWidget(QWidget):
 class PadderDialog:
     def __init__(self):
         super().__init__()
+        
         dialog: QDialog = QDialog()
         dialog.setWindowTitle("Spritesheet Editor: Padder")
 
