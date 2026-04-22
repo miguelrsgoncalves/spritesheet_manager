@@ -1,5 +1,6 @@
 import os
 from krita import Krita, InfoObject
+from PyQt5.QtGui import QImage
 
 PREVIEW_RESOLUTION_SCALING = 0.35
 
@@ -24,7 +25,7 @@ class Padder():
         self._is_export_kra = is_export_kra
         self._is_export_image = is_export_image
     
-    def run(self, is_preview: bool = False):
+    def run(self, is_preview: bool = False, preview_size: list[int] = []):
         krita = Krita.instance()
 
         #region preview_scaling
@@ -96,7 +97,9 @@ class Padder():
         padded_document.refreshProjection()
 
         if is_preview:
-            return padded_document
+            q_image: QImage = padded_document.thumbnail(preview_size[0], preview_size[1])
+            padded_document.close()
+            return q_image
         
         #region export
 
