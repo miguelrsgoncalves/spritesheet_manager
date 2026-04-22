@@ -51,7 +51,7 @@ class PreviewWindow(QWidget):
         self._timer_tick_interval: int = timer_tick_interval
         self._timer_tick_label: str = timer_tick_label
         self._aspect_ration: int = aspect_ratio
-        self._window_size: list[int] = window_size
+        self.window_size: list[int] = window_size
 
         self._preview_timer: QTimer = QTimer()
         self._preview_timer_interval: int = 0
@@ -73,8 +73,8 @@ class PreviewWindow(QWidget):
         preview_controls_layout.addWidget(self._preview_manual_update_button)
         
         self._preview_window: QLabel = QLabel()
-        self._preview_window.setMinimumSize(self._window_size[0], self._window_size[1])
-        self._preview_window.setMaximumSize(self._window_size[2], self._window_size[3])
+        self._preview_window.setMinimumSize(self.window_size[0], self.window_size[1])
+        self._preview_window.setMaximumSize(self.window_size[2], self.window_size[3])
         
         self._preview_window.setSizePolicy(
             self._preview_window.sizePolicy().Expanding,

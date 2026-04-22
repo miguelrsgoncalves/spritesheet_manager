@@ -69,12 +69,9 @@ class AnimationExporterWidget(QWidget):
     def _refresh_preview(self):
         animation_exporter_arguments: dict[str, any] = self._get_animation_exporter_arguments()
         exporter: AnimationExporter = AnimationExporter(**animation_exporter_arguments)
-        preview_document, final_width, final_height = exporter.run(True)
-
-        if preview_document:
-            q_image = preview_document.thumbnail(480, 270)
-            preview_document.close()
-            return q_image, final_width, final_height
+        preview_image, final_width, final_height = exporter.run(True, [self._preview_window.window_size[0], self._preview_window.window_size[1]])
+        if preview_image:
+            return preview_image, final_width, final_height
 
         return None, 0, 0
     

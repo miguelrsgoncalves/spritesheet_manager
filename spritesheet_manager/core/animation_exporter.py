@@ -1,5 +1,6 @@
 import os
 from krita import Krita, InfoObject
+from PyQt5.QtGui import QImage
 from enum import Enum
 
 PREVIEW_RESOLUTION_SCALING = 0.35
@@ -35,7 +36,7 @@ class AnimationExporter:
         self._is_export_kra = is_export_kra
         self._is_export_image = is_export_image
 
-    def run(self, is_preview: bool = False):
+    def run(self, is_preview: bool = False, preview_size: list[int] = []):
         krita = Krita.instance()
 
         #region preview_scaling
@@ -103,7 +104,9 @@ class AnimationExporter:
         self._document.setBatchmode(False)
 
         if is_preview:
-            return animation_document, animation_document_width, animation_document_height
+            q_image: QImage = animation_document.thumbnail(480, 270)
+            animation_document.close()
+            return q_image, animation_document_width, animation_document_height
         
         #region export
 
