@@ -100,8 +100,8 @@ class AnimationExporter:
             animation_layer.setPixelData(pixel_data, destination_x, destination_y, frame_width, frame_height)
 
         animation_document.refreshProjection()
-
         self._document.setBatchmode(False)
+        animation_document.setBatchmode(False)
 
         if is_preview:
             q_image: QImage = animation_document.thumbnail(480, 270)
@@ -129,4 +129,3 @@ class AnimationExporter:
         
         if not self._is_export_kra:
             animation_document.close()
-            animation_document.setBatchmode(False)
