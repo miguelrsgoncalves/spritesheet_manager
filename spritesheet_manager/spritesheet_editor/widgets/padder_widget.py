@@ -1,7 +1,6 @@
 from krita import Krita
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 from ...core.padder import Padder
 from ...core.widgets import PreviewWindow, LinkButton
