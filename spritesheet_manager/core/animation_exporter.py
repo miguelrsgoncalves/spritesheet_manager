@@ -104,7 +104,7 @@ class AnimationExporter:
         animation_document.setBatchmode(False)
 
         if is_preview:
-            q_image: QImage = animation_document.thumbnail(480, 270)
+            q_image: QImage = animation_document.thumbnail(preview_size[0], preview_size[1])
             animation_document.close()
             return q_image, animation_document_width, animation_document_height
         
