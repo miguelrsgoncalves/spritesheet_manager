@@ -70,10 +70,8 @@ class AnimationExporterWidget(QWidget):
         animation_exporter_arguments: dict[str, any] = self._get_animation_exporter_arguments()
         exporter: AnimationExporter = AnimationExporter(**animation_exporter_arguments)
         preview_image, final_width, final_height = exporter.run(True, [self._preview_window.window_size[0], self._preview_window.window_size[1]])
-        if preview_image:
-            return preview_image, final_width, final_height
 
-        return None, 0, 0
+        return preview_image, final_width, final_height if preview_image else None, 0, 0
     
     def _get_default_animation_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("animation_file_suffix") if self._document else "Animation Spritesheet"
