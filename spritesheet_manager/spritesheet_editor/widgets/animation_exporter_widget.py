@@ -23,8 +23,8 @@ DEFAULTS: dict[str, any] = {
 }
 
 class AnimationExporterWidget(QWidget):
-    def __init__(self, document):
-        super().__init__()
+    def __init__(self, parent, document):
+        super().__init__(parent)
 
         self._document = document
 
@@ -275,15 +275,15 @@ class AnimationExporterWidget(QWidget):
             self._on_frames_changed()
 
 class AnimationExporterDialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent = None):
+        super().__init__(parent)
 
         self.setWindowTitle("Spritesheet Editor: Animation Exporter")
 
         layout: QVBoxLayout = QVBoxLayout()
 
         document = Krita.instance().activeDocument()
-        animation_exporter_widget: AnimationExporterWidget = AnimationExporterWidget(document)
+        animation_exporter_widget: AnimationExporterWidget = AnimationExporterWidget(self, document)
 
         layout.addWidget(animation_exporter_widget)
 

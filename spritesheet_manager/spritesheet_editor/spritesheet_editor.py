@@ -13,7 +13,7 @@ def create_spritesheet_editor_actions(plugin_instance, window, menu):
     menu.addAction(padder_action)
 
     animation_exporter_action: QAction = QAction("Animation Exporter", main_window)
-    animation_exporter_action.triggered.connect(run_animation_exporter_dialog)
+    animation_exporter_action.triggered.connect(lambda: run_animation_exporter_dialog(main_window))
     animation_exporter_action.setToolTip("Export an animation as a spritesheet.")
     menu.addAction(animation_exporter_action)
 
@@ -21,9 +21,9 @@ def run_padder_dialog(main_window):
     if not has_active_document(): return
     PadderDialog(main_window)
 
-def run_animation_exporter_dialog():
+def run_animation_exporter_dialog(main_window):
     if not has_active_document(): return
-    AnimationExporterDialog()
+    AnimationExporterDialog(main_window)
 
 def has_active_document() -> bool:
     document = Krita.instance().activeDocument()
