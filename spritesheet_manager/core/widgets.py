@@ -40,100 +40,100 @@ class PreviewWindow(QWidget):
             refresh_callback: callable,
             timer_interval: int = 1000,
             timer_tick_interval: int = 10,
-            timer_tick_label: str = "Refreshing preview in {:.3f} s",
-            aspect_ratio: int = 16 / 9,
             window_size: list[int] = [480, 270, 640, 360],
+            aspect_ratio: int = 16 / 9,
+            timer_tick_label: str = "Refreshing preview in {:.3f} s",
     ):
         super().__init__()
         
         self._refresh_callback: callable = refresh_callback
         self._timer_interval: int = timer_interval
         self._timer_tick_interval: int = timer_tick_interval
-        self._timer_tick_label: str = timer_tick_label
-        self._aspect_ration: int = aspect_ratio
         self.window_size: list[int] = window_size
+        self._aspect_ration: int = aspect_ratio
+        self._timer_tick_label: str = timer_tick_label
 
-        self._preview_timer: QTimer = QTimer()
-        self._preview_timer_interval: int = 0
-        self._preview_timer.timeout.connect(self._on_timer_tick)
+        self._timer: QTimer = QTimer()
+        self._timer_interval: int = 0
+        self._timer.timeout.connect(self._on_timer_tick)
 
-        preview_layout: QVBoxLayout = QVBoxLayout(self)
-        preview_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout: QVBoxLayout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        preview_controls_layout: QHBoxLayout = QHBoxLayout()
+        controls_layout: QHBoxLayout = QHBoxLayout()
 
         self._auto_update_preview_checkbox: QCheckBox = QCheckBox("Auto-update Preview")
         self._auto_update_preview_checkbox.setChecked(True)
         self._auto_update_preview_checkbox.toggled.connect(self.request_refresh)
 
-        self._preview_manual_update_button: QPushButton = QPushButton("Refresh")
-        self._preview_manual_update_button.clicked.connect(self.force_refresh)
+        self._manual_update_button: QPushButton = QPushButton("Refresh")
+        self._manual_update_button.clicked.connect(self.force_refresh)
 
-        preview_controls_layout.addWidget(self._auto_update_preview_checkbox)
-        preview_controls_layout.addWidget(self._preview_manual_update_button)
+        controls_layout.addWidget(self._auto_update_preview_checkbox)
+        controls_layout.addWidget(self._manual_update_button)
         
-        self._preview_window: QLabel = QLabel()
-        self._preview_window.setMinimumSize(self.window_size[0], self.window_size[1])
-        self._preview_window.setMaximumSize(self.window_size[2], self.window_size[3])
+        self._window: QLabel = QLabel()
+        self._window.setMinimumSize(self.window_size[0], self.window_size[1])
+        self._window.setMaximumSize(self.window_size[2], self.window_size[3])
         
-        self._preview_window.setSizePolicy(
-            self._preview_window.sizePolicy().Expanding,
-            self._preview_window.sizePolicy().Expanding
+        self._window.setSizePolicy(
+            self._window.sizePolicy().Expanding,
+            self._window.sizePolicy().Expanding
         )
-        self._preview_window.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._preview_window.setStyleSheet("""
+        self._window.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._window.setStyleSheet("""
             QLabel {
                 background-color: #313131;
                 border-radius: 4px;
             }"""
         )
 
-        self._preview_resolution_label: QLabel = QLabel("Export Resolution: 0x0 px")
-        self._preview_resolution_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._preview_resolution_label.setToolTip("The preview image is scaled down, resulting in a lower quality image.")
+        self._export_size_label: QLabel = QLabel()
+        self._export_size_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._export_size_label.setToolTip("The preview image is scaled down for faster rendering, resulting in a lower quality image.")
 
-        preview_layout.addLayout(preview_controls_layout)
-        preview_layout.addWidget(self._preview_window)
-        preview_layout.addWidget(self._preview_resolution_label)
+        layout.addLayout(controls_layout)
+        layout.addWidget(self._window)
+        layout.addWidget(self._export_size_label)
         
-        self.setLayout(preview_layout)
+        self.setLayout(layout)
     
     def request_refresh(self):
         if self._auto_update_preview_checkbox.isChecked():
-            self._preview_timer_interval = self._timer_interval
-            self._preview_timer.start(self._timer_tick_interval)
+            self._timer_interval = self._timer_interval
+            self._timer.start(self._timer_tick_interval)
         else:
-            self._preview_timer.stop()
-            self._preview_window.setText("Preview out of date")
+            self._timer.stop()
+            self._window.setText("Preview out of date")
     
     def force_refresh(self):
-        self._preview_timer.stop()
+        self._timer.stop()
         self._refresh()
     
     def _refresh(self):
         if not self._refresh_callback: return
 
-        self._preview_window.clear()
-        self._preview_window.setText("Rendering...")
+        self._window.clear()
+        self._window.setText("Rendering...")
 
         q_image, arguments = self._refresh_callback()
 
         if q_image:
-            self._preview_window.setPixmap(QPixmap.fromImage(q_image))
+            self._window.setPixmap(QPixmap.fromImage(q_image))
 
-            preview_size: list[int] = arguments.get("preview_size")
-            if preview_size:
-                self._preview_resolution_label.show()
-                self._preview_resolution_label.setText(f"Export Resolution: {preview_size[0]}x{preview_size[1]} px")
+            export_size: list[int] = arguments.get("export_size")
+            if export_size:
+                self._export_size_label.show()
+                self._export_size_label.setText(f"Export Size: {export_size[0]}x{export_size[1]} px")
             else:
-                self._preview_resolution_label.hide()
+                self._export_size_label.hide()
 
     def _on_timer_tick(self):
-        self._preview_timer_interval -= self._timer_tick_interval
+        self._timer_interval -= self._timer_tick_interval
 
-        if self._preview_timer_interval > 0:
-            time = self._preview_timer_interval / 1000.0
-            self._preview_window.setText(self._timer_tick_label.format(time))
+        if self._timer_interval > 0:
+            time = self._timer_interval / 1000.0
+            self._window.setText(self._timer_tick_label.format(time))
         else:
-            self._preview_timer.stop()
+            self._timer.stop()
             self._refresh()
