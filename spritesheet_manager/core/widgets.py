@@ -38,8 +38,8 @@ class PreviewWindow(QWidget):
     def __init__(
             self,
             refresh_callback: callable,
-            timer_interval: int = 1000,
-            timer_tick_interval: int = 10,
+            timer_duration: int = 1000,
+            timer_tick: int = 10,
             window_size: list[int] = [480, 270, 640, 360],
             aspect_ratio: int = 16 / 9,
             timer_tick_label: str = "Refreshing preview in {:.3f} s",
@@ -47,14 +47,14 @@ class PreviewWindow(QWidget):
         super().__init__()
         
         self._refresh_callback: callable = refresh_callback
-        self._timer_interval: int = timer_interval
-        self._timer_tick_interval: int = timer_tick_interval
+        self._timer_duration: int = timer_duration
+        self._timer_tick: int = timer_tick
         self.window_size: list[int] = window_size
         self._aspect_ration: int = aspect_ratio
         self._timer_tick_label: str = timer_tick_label
 
         self._timer: QTimer = QTimer()
-        self._timer_interval: int = 0
+        self._timer_countdown: int = 0
         self._timer.timeout.connect(self._on_timer_tick)
 
         layout: QVBoxLayout = QVBoxLayout(self)
@@ -100,8 +100,8 @@ class PreviewWindow(QWidget):
     
     def request_refresh(self):
         if self._auto_update_preview_checkbox.isChecked():
-            self._timer_interval = self._timer_interval
-            self._timer.start(self._timer_tick_interval)
+            self._timer_countdown = self._timer_duration
+            self._timer.start(self._timer_tick)
         else:
             self._timer.stop()
             self._window.setText("Preview out of date")
@@ -129,10 +129,10 @@ class PreviewWindow(QWidget):
                 self._export_size_label.hide()
 
     def _on_timer_tick(self):
-        self._timer_interval -= self._timer_tick_interval
+        self._timer_countdown -= self._timer_tick
 
-        if self._timer_interval > 0:
-            time = self._timer_interval / 1000.0
+        if self._timer_countdown > 0:
+            time = self._timer_countdown / 1000.0
             self._window.setText(self._timer_tick_label.format(time))
         else:
             self._timer.stop()
