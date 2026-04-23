@@ -77,7 +77,6 @@ class Padder():
                 tile_data = self._document.pixelData(
                     source_x, source_y,
                     self._tile_size[0], self._tile_size[1]
-                
                 )
 
                 padded_layer.setPixelData(
