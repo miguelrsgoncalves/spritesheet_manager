@@ -13,7 +13,6 @@ WIDGET_DESCRIPTION: str = "Animation Exporter settings"
 
 DEFAULTS: dict[str, any] = {
     "start_frame": 0,
-    "end_frame": 0,
     "frame_step": 1,
     "packing_type": 0,
     "grid_size": [11, 1],
@@ -186,15 +185,12 @@ class AnimationExporterWidget(QWidget):
     #region state
 
     def _load_state(self):
-        krita = Krita.instance()
-        document = krita.activeDocument()
-
-        state: dict[str, any] = Serializer.load_state(document, WIDGET_KEY)
+        state: dict[str, any] = Serializer.load_state(self._document, WIDGET_KEY)
         self._set_state(state)
     
     def _set_state(self, state):
         self._start_frame_input.setValue(state.get("start_frame", DEFAULTS["start_frame"]))
-        self._end_frame_input.setValue(state.get("end_frame", DEFAULTS["end_frame"]))
+        self._end_frame_input.setValue(state.get("end_frame", self._document.animationLength() - 1))
         self._frame_step_input.setValue(state.get("frame_step", DEFAULTS["frame_step"]))
         self._packing_type_input.setCurrentIndex(state.get("packing_type", DEFAULTS["packing_type"]))
 
@@ -209,11 +205,8 @@ class AnimationExporterWidget(QWidget):
         self.refresh_ui()
 
     def _save_state(self):
-        krita = Krita.instance()
-        document = krita.activeDocument()
-
         data: dict[str, any] = self._get_state()
-        Serializer.save_state(document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
+        Serializer.save_state(self._document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
     
     def _get_state(self) -> dict[str, any]:
         return {
