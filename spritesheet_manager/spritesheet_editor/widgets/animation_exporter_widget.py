@@ -13,6 +13,7 @@ WIDGET_DESCRIPTION: str = "Animation Exporter settings"
 
 DEFAULTS: dict[str, any] = {
     "start_frame": 0,
+    "end_frame": 0,
     "frame_step": 1,
     "packing_type": 0,
     "grid_size": [11, 1],
@@ -37,6 +38,8 @@ class AnimationExporterWidget(QWidget):
         layout.addWidget(self._build_output_group())
 
         self.setLayout(layout)
+
+        self._load_state()
 
         self.refresh_ui()
     
@@ -302,5 +305,7 @@ class AnimationExporterDialog(QDialog):
         self.setLayout(layout)
 
         if self.exec_() != QDialog.Accepted: return None
+
+        animation_exporter_widget._save_state()
 
         animation_exporter_widget.run_animation_exporter()
