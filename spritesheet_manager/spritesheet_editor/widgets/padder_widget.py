@@ -23,8 +23,8 @@ DEFAULTS: dict[str, any] = {
 }
 
 class PadderWidget(QWidget):
-    def __init__(self, document):
-        super().__init__()
+    def __init__(self, parent, document):
+        super().__init__(parent)
 
         self._document = document
 
@@ -351,17 +351,16 @@ class PadderWidget(QWidget):
 
     #endregion
 
-class PadderDialog:
-    def __init__(self):
-        super().__init__()
+class PadderDialog(QDialog):
+    def __init__(self, parent = None):
+        super().__init__(parent)
         
-        dialog: QDialog = QDialog()
-        dialog.setWindowTitle("Spritesheet Editor: Padder")
+        self.setWindowTitle("Spritesheet Editor: Padder")
 
         layout: QVBoxLayout = QVBoxLayout()
 
         document = Krita.instance().activeDocument()
-        padder_widget: PadderWidget = PadderWidget(document)
+        padder_widget: PadderWidget = PadderWidget(self, document)
 
         layout.addWidget(padder_widget)
 
@@ -369,13 +368,13 @@ class PadderDialog:
 
         buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         buttons.button(QDialogButtonBox.Ok).setText("Apply Padding")
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-        dialog.setLayout(layout)
+        self.setLayout(layout)
 
-        if dialog.exec_() != QDialog.Accepted: return None
+        if self.exec_() != QDialog.Accepted: return None
 
         padder_widget._save_state()
 

@@ -8,7 +8,7 @@ def create_spritesheet_editor_actions(plugin_instance, window, menu):
     main_window: QMainWindow = window.qwindow()
 
     padder_action: QAction = QAction("Padder", main_window)
-    padder_action.triggered.connect(run_padder_dialog)
+    padder_action.triggered.connect(lambda: run_padder_dialog(main_window))
     padder_action.setToolTip("Add padding to a spritesheet.")
     menu.addAction(padder_action)
 
@@ -17,9 +17,9 @@ def create_spritesheet_editor_actions(plugin_instance, window, menu):
     animation_exporter_action.setToolTip("Export an animation as a spritesheet.")
     menu.addAction(animation_exporter_action)
 
-def run_padder_dialog():
+def run_padder_dialog(main_window):
     if not has_active_document(): return
-    PadderDialog()
+    PadderDialog(main_window)
 
 def run_animation_exporter_dialog():
     if not has_active_document(): return
