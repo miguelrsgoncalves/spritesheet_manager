@@ -39,6 +39,8 @@ class PadderWidget(QWidget):
 
         self.setLayout(layout)
 
+        self._load_state()
+
         self.refresh_ui()
 
     #region functions
@@ -232,10 +234,7 @@ class PadderWidget(QWidget):
     #region state
 
     def _load_state(self):
-        krita = Krita.instance()
-        document = krita.activeDocument()
-
-        state: dict[str, any] = Serializer.load_state(document, WIDGET_KEY)
+        state: dict[str, any] = Serializer.load_state(self._document, WIDGET_KEY)
         self._set_state(state)
     
     def _set_state(self, state):
@@ -258,11 +257,8 @@ class PadderWidget(QWidget):
         self.refresh_ui()
 
     def _save_state(self):
-        krita = Krita.instance()
-        document = krita.activeDocument()
-
         data: dict[str, any] = self._get_state()
-        Serializer.save_state(document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
+        Serializer.save_state(self._document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
     
     def _get_state(self) -> dict[str, any]:
         return {
@@ -380,5 +376,7 @@ class PadderDialog:
         dialog.setLayout(layout)
 
         if dialog.exec_() != QDialog.Accepted: return None
+
+        padder_widget._save_state()
 
         padder_widget.run_padder()
