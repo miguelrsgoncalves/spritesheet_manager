@@ -99,10 +99,10 @@ class Padder():
             preview_image: QImage = padded_document.thumbnail(preview_size[0], preview_size[1])
 
             preview_arguments: dict[str, any] = {
-                "export_size": {
+                "export_size": [
                     padded_document_height,
                     padded_document_width
-                },
+                ],
             }
 
             padded_document.close()
