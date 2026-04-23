@@ -116,11 +116,17 @@ class PreviewWindow(QWidget):
         self._preview_window.clear()
         self._preview_window.setText("Rendering...")
 
-        q_image, width, height = self._refresh_callback()
+        q_image, arguments = self._refresh_callback()
 
         if q_image:
             self._preview_window.setPixmap(QPixmap.fromImage(q_image))
-            self._preview_resolution_label.setText(f"Export Resolution: {width}x{height} px")
+
+            preview_size: list[int] = arguments.get("preview_size")
+            if preview_size:
+                self._preview_resolution_label.show()
+                self._preview_resolution_label.setText(f"Export Resolution: {preview_size[0]}x{preview_size[1]} px")
+            else:
+                self._preview_resolution_label.hide()
 
     def _on_timer_tick(self):
         self._preview_timer_interval -= self._timer_tick_interval
