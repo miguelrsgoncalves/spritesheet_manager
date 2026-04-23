@@ -68,12 +68,8 @@ class PadderWidget(QWidget):
     def _refresh_preview(self):
         padder_arguments: dict[str, any] = self._get_padder_arguments()
         exporter: Padder = Padder(**padder_arguments)
-        preview_image = exporter.run(True, [self._preview_window.window_size[0], self._preview_window.window_size[1]])
-
-        final_width: int = padder_arguments["grid_size"][0] * padder_arguments["tile_size"][0] + (padder_arguments["padding_size"][0] * 2)
-        final_height: int = padder_arguments["grid_size"][1] * padder_arguments["tile_size"][1] + (padder_arguments["padding_size"][1] * 2)
-
-        return (preview_image, final_width, final_height) if preview_image else (None, 0, 0)
+        preview_image, preview_arguments = exporter.run(True, [self._preview_window.window_size[0], self._preview_window.window_size[1]])
+        return (preview_image, preview_arguments) if preview_image else (None, [])
     
     def _get_default_padded_export_name(self) -> str:
         return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"

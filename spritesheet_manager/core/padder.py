@@ -96,9 +96,17 @@ class Padder():
         padded_document.refreshProjection()
 
         if is_preview:
-            q_image: QImage = padded_document.thumbnail(preview_size[0], preview_size[1])
+            preview_image: QImage = padded_document.thumbnail(preview_size[0], preview_size[1])
+
+            preview_arguments: dict[str, any] = {
+                "export_size": {
+                    padded_document_height,
+                    padded_document_width
+                },
+            }
+
             padded_document.close()
-            return q_image
+            return preview_image, preview_arguments
         
         #region export
 
