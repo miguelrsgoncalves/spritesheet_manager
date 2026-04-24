@@ -1,6 +1,6 @@
-from krita import Extension
+from krita import Extension, DockWidgetFactory, DockWidgetFactoryBase
 from PyQt5.QtWidgets import QMainWindow, QMenu
-from .atlas_editor.atlas_editor import create_atlas_editor_actions
+from .atlas_editor.atlas_editor import create_atlas_editor_actions, setup_atlas_editor_dockers_factory
 from .spritesheet_editor.spritesheet_editor import create_spritesheet_editor_actions
 
 class SpritesheetManagerExtension(Extension):
@@ -8,7 +8,7 @@ class SpritesheetManagerExtension(Extension):
         super().__init__(parent)
 
     def setup(self):
-        pass
+        setup_atlas_editor_dockers_factory()
 
     def createActions(self, window):
         main_window: QMainWindow = window.qwindow()
