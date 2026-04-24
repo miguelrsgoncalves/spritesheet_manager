@@ -7,22 +7,22 @@ from ...core.widgets import PreviewWindow, LinkButton
 
 MAX_INT: int = 2147483647
 
-WIDGET_KEY: str = "PADDER"
-WIDGET_DESCRIPTION: str = "Padder settings"
-
-DEFAULTS: dict[str, any] = {
-    "tile_size": [64, 64],
-    "grid_size": [1, 1],
-    "grid_size_auto_update": True,
-    "padding_size": [8, 8],
-    "padding_size_auto_update": True,
-    "is_anti_bleed": True,
-    "is_export_kra": False,
-    "is_export_image": True,
-    "padded_file_suffix": "_padded"
-}
-
 class PadderWidget(QWidget):
+    WIDGET_KEY: str = "PADDER"
+    WIDGET_DESCRIPTION: str = "Padder settings"
+
+    DEFAULTS: dict[str, any] = {
+        "tile_size": [64, 64],
+        "grid_size": [1, 1],
+        "grid_size_auto_update": True,
+        "padding_size": [8, 8],
+        "padding_size_auto_update": True,
+        "is_anti_bleed": True,
+        "is_export_kra": False,
+        "is_export_image": True,
+        "padded_file_suffix": "_padded"
+    }
+
     def __init__(self, parent, document):
         super().__init__(parent)
 
@@ -74,7 +74,7 @@ class PadderWidget(QWidget):
         return (preview_image, preview_arguments) if preview_image else (None, {})
     
     def _get_default_padded_export_name(self) -> str:
-        return self._document.name() + DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
+        return self._document.name() + self.DEFAULTS.get("padded_file_suffix") if self._document else "Padded Spritesheet"
     
     #endregion
 
@@ -91,13 +91,13 @@ class PadderWidget(QWidget):
 
         self._tile_width_input: QSpinBox = QSpinBox()
         self._tile_width_input.setRange(1, MAX_INT)
-        self._tile_width_input.setValue(DEFAULTS.get("tile_size")[0])
+        self._tile_width_input.setValue(self.DEFAULTS.get("tile_size")[0])
         self._tile_width_input.valueChanged.connect(self._on_tile_size_changed)
         self._tile_width_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._tile_height_input: QSpinBox = QSpinBox()
         self._tile_height_input.setRange(1, MAX_INT)
-        self._tile_height_input.setValue(DEFAULTS.get("tile_size")[1])
+        self._tile_height_input.setValue(self.DEFAULTS.get("tile_size")[1])
         self._tile_height_input.valueChanged.connect(self._on_tile_size_changed)
         self._tile_height_input.valueChanged.connect(self._on_padder_argument_changed)
 
@@ -121,18 +121,18 @@ class PadderWidget(QWidget):
 
         self._grid_columns_input: QSpinBox = QSpinBox()
         self._grid_columns_input.setRange(1, MAX_INT)
-        self._grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
+        self._grid_columns_input.setValue(self.DEFAULTS.get("grid_size")[0])
         self._grid_columns_input.valueChanged.connect(self._on_grid_size_changed)
         self._grid_columns_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._grid_rows_input: QSpinBox = QSpinBox()
         self._grid_rows_input.setRange(1, MAX_INT)
-        self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
+        self._grid_rows_input.setValue(self.DEFAULTS.get("grid_size")[1])
         self._grid_rows_input.valueChanged.connect(self._on_grid_size_changed)
         self._grid_rows_input.valueChanged.connect(self._on_padder_argument_changed)
 
         self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
-        self._grid_size_auto_update_checkbox.setChecked(DEFAULTS.get("grid_size_auto_update"))
+        self._grid_size_auto_update_checkbox.setChecked(self.DEFAULTS.get("grid_size_auto_update"))
         self._grid_size_auto_update_checkbox.setToolTip("Auto-update the grid size using the tile size and the document's size.")
         self._grid_size_auto_update_checkbox.toggled.connect(self._on_grid_auto_update_toggled)
 
@@ -157,18 +157,18 @@ class PadderWidget(QWidget):
 
         self._padding_width_input: QSpinBox = QSpinBox()
         self._padding_width_input.setRange(1, MAX_INT)
-        self._padding_width_input.setValue(DEFAULTS.get("padding_size")[0])
+        self._padding_width_input.setValue(self.DEFAULTS.get("padding_size")[0])
         self._padding_width_input.valueChanged.connect(self._on_padding_size_changed)
         self._padding_width_input.valueChanged.connect(self._on_padder_argument_changed)
         
         self._padding_height_input: QSpinBox = QSpinBox()
         self._padding_height_input.setRange(1, MAX_INT)
-        self._padding_height_input.setValue(DEFAULTS.get("padding_size")[1])
+        self._padding_height_input.setValue(self.DEFAULTS.get("padding_size")[1])
         self._padding_height_input.valueChanged.connect(self._on_padding_size_changed)
         self._padding_height_input.valueChanged.connect(self._on_padder_argument_changed)
 
         self._padding_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
-        self._padding_size_auto_update_checkbox.setChecked(DEFAULTS.get("padding_size_auto_update"))
+        self._padding_size_auto_update_checkbox.setChecked(self.DEFAULTS.get("padding_size_auto_update"))
         self._padding_size_auto_update_checkbox.setToolTip("Auto-update the padding size using the tile size, by default it's tile_size / 8.")
         self._padding_size_auto_update_checkbox.toggled.connect(self._on_padding_auto_update_toggled)
 
@@ -200,7 +200,7 @@ class PadderWidget(QWidget):
         options_layout: QVBoxLayout = QVBoxLayout()
 
         self._is_anti_bleed_input: QCheckBox = QCheckBox("Anti-pixel-bleed padding")
-        self._is_anti_bleed_input.setChecked(DEFAULTS.get("is_anti_bleed"))
+        self._is_anti_bleed_input.setChecked(self.DEFAULTS.get("is_anti_bleed"))
         self._is_anti_bleed_input.setToolTip("Repeats edge pixels into the padding area to prevent colour bleeding at tile seams.")
         self._is_anti_bleed_input.toggled.connect(self._on_padder_argument_changed)
 
@@ -234,31 +234,31 @@ class PadderWidget(QWidget):
     #region state
 
     def _load_state(self):
-        state: dict[str, any] = Serializer.load_state(self._document, WIDGET_KEY)
+        state: dict[str, any] = Serializer.load_state(self._document, self.WIDGET_KEY)
         self._set_state(state)
     
     def _set_state(self, state):
-        tile_width, tile_height = state.get("tile_size", DEFAULTS["tile_size"])
+        tile_width, tile_height = state.get("tile_size", self.DEFAULTS["tile_size"])
         self._tile_width_input.setValue(tile_width)
         self._tile_height_input.setValue(tile_height)
 
-        columns, rows = state.get("grid_size", DEFAULTS["grid_size"])
+        columns, rows = state.get("grid_size", self.DEFAULTS["grid_size"])
         self._grid_columns_input.setValue(columns)
         self._grid_rows_input.setValue(rows)
 
-        padding_width, padding_height = state.get("padding_size", DEFAULTS["padding_size"])
+        padding_width, padding_height = state.get("padding_size", self.DEFAULTS["padding_size"])
         self._padding_width_input.setValue(padding_width)
         self._padding_height_input.setValue(padding_height)
 
-        self._is_anti_bleed_input.setChecked(state.get("is_anti_bleed", DEFAULTS["is_anti_bleed"]))
-        self._is_export_kra_input.setChecked(state.get("is_export_kra", DEFAULTS["is_export_kra"]))
-        self._is_export_image_input.setChecked(state.get("is_export_image", DEFAULTS["is_export_image"]))
+        self._is_anti_bleed_input.setChecked(state.get("is_anti_bleed", self.DEFAULTS["is_anti_bleed"]))
+        self._is_export_kra_input.setChecked(state.get("is_export_kra", self.DEFAULTS["is_export_kra"]))
+        self._is_export_image_input.setChecked(state.get("is_export_image", self.DEFAULTS["is_export_image"]))
 
         self.refresh_ui()
 
     def _save_state(self):
         data: dict[str, any] = self._get_state()
-        Serializer.save_state(self._document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
+        Serializer.save_state(self._document, self.WIDGET_KEY, data, self.WIDGET_DESCRIPTION)
     
     def _get_state(self) -> dict[str, any]:
         return {
