@@ -8,21 +8,21 @@ from ...core.widgets import PreviewWindow
 
 MAX_INT: int = 2147483647
 
-WIDGET_KEY: str = "ANIMATION_EXPORTER"
-WIDGET_DESCRIPTION: str = "Animation Exporter settings"
-
-DEFAULTS: dict[str, any] = {
-    "start_frame": 0,
-    "frame_step": 1,
-    "packing_type": 0,
-    "grid_size": [11, 1],
-    "grid_size_auto_update": True,
-    "is_export_kra": False,
-    "is_export_image": True,
-    "animation_file_suffix": "_animation"
-}
-
 class AnimationExporterWidget(QWidget):
+    WIDGET_KEY: str = "ANIMATION_EXPORTER"
+    WIDGET_DESCRIPTION: str = "Animation Exporter settings"
+
+    DEFAULTS: dict[str, any] = {
+        "start_frame": 0,
+        "frame_step": 1,
+        "packing_type": 0,
+        "grid_size": [11, 1],
+        "grid_size_auto_update": True,
+        "is_export_kra": False,
+        "is_export_image": True,
+        "animation_file_suffix": "_animation"
+    }
+
     def __init__(self, parent, document):
         super().__init__(parent)
 
@@ -75,7 +75,7 @@ class AnimationExporterWidget(QWidget):
         return (preview_image, arguments) if preview_image else (None, {})
     
     def _get_default_animation_export_name(self) -> str:
-        return self._document.name() + DEFAULTS.get("animation_file_suffix") if self._document else "Animation Spritesheet"
+        return self._document.name() + self.DEFAULTS.get("animation_file_suffix") if self._document else "Animation Spritesheet"
     
     #endregion
     
@@ -92,7 +92,7 @@ class AnimationExporterWidget(QWidget):
 
         self._start_frame_input: QSpinBox = QSpinBox()
         self._start_frame_input.setRange(0, MAX_INT)
-        self._start_frame_input.setValue(DEFAULTS.get("start_frame"))
+        self._start_frame_input.setValue(self.DEFAULTS.get("start_frame"))
         self._start_frame_input.valueChanged.connect(self._on_frames_changed)
         
         self._end_frame_input: QSpinBox = QSpinBox()
@@ -102,7 +102,7 @@ class AnimationExporterWidget(QWidget):
 
         self._frame_step_input: QSpinBox = QSpinBox()
         self._frame_step_input.setRange(1, MAX_INT)
-        self._frame_step_input.setValue(DEFAULTS.get("frame_step"))
+        self._frame_step_input.setValue(self.DEFAULTS.get("frame_step"))
         self._frame_step_input.valueChanged.connect(self._on_frames_changed)
 
         frame_settings_layout.addWidget(QLabel("Animation Settings"), 0, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
@@ -122,21 +122,21 @@ class AnimationExporterWidget(QWidget):
 
         self._packing_type_input: QComboBox = QComboBox()
         self._packing_type_input.addItems(["Horizontal", "Vertical", "Square"])
-        self._packing_type_input.setCurrentIndex(DEFAULTS.get("packing_type"))
+        self._packing_type_input.setCurrentIndex(self.DEFAULTS.get("packing_type"))
         self._packing_type_input.currentIndexChanged.connect(self._on_frames_changed)
 
         self._grid_columns_input: QSpinBox = QSpinBox()
         self._grid_columns_input.setRange(1, MAX_INT)
-        self._grid_columns_input.setValue(DEFAULTS.get("grid_size")[0])
+        self._grid_columns_input.setValue(self.DEFAULTS.get("grid_size")[0])
         self._grid_columns_input.valueChanged.connect(self._on_grid_size_changed)
         
         self._grid_rows_input: QSpinBox = QSpinBox()
         self._grid_rows_input.setRange(1, MAX_INT)
-        self._grid_rows_input.setValue(DEFAULTS.get("grid_size")[1])
+        self._grid_rows_input.setValue(self.DEFAULTS.get("grid_size")[1])
         self._grid_rows_input.valueChanged.connect(self._on_grid_size_changed)
 
         self._grid_size_auto_update_checkbox: QCheckBox = QCheckBox("Auto-update")
-        self._grid_size_auto_update_checkbox.setChecked(DEFAULTS.get("grid_size_auto_update"))
+        self._grid_size_auto_update_checkbox.setChecked(self.DEFAULTS.get("grid_size_auto_update"))
         self._grid_size_auto_update_checkbox.setToolTip("Auto-calculate columns and rows based on frames and packing type.")
         self._grid_size_auto_update_checkbox.toggled.connect(self._on_grid_auto_update_toggled)
 
@@ -168,10 +168,10 @@ class AnimationExporterWidget(QWidget):
         export_name_layout.addWidget(self._export_name_input)
         
         self._is_export_kra_input: QCheckBox = QCheckBox("Save .kra")
-        self._is_export_kra_input.setChecked(DEFAULTS.get("is_export_kra"))
+        self._is_export_kra_input.setChecked(self.DEFAULTS.get("is_export_kra"))
 
         self._is_export_image_input: QCheckBox = QCheckBox("Export image")
-        self._is_export_image_input.setChecked(DEFAULTS.get("is_export_image"))
+        self._is_export_image_input.setChecked(self.DEFAULTS.get("is_export_image"))
 
         output_layout.addLayout(export_name_layout)
         output_layout.addWidget(self._is_export_kra_input)
@@ -185,28 +185,28 @@ class AnimationExporterWidget(QWidget):
     #region state
 
     def _load_state(self):
-        state: dict[str, any] = Serializer.load_state(self._document, WIDGET_KEY)
+        state: dict[str, any] = Serializer.load_state(self._document, self.WIDGET_KEY)
         self._set_state(state)
     
     def _set_state(self, state):
-        self._start_frame_input.setValue(state.get("start_frame", DEFAULTS["start_frame"]))
+        self._start_frame_input.setValue(state.get("start_frame", self.DEFAULTS["start_frame"]))
         self._end_frame_input.setValue(state.get("end_frame", self._document.animationLength() - 1))
-        self._frame_step_input.setValue(state.get("frame_step", DEFAULTS["frame_step"]))
-        self._packing_type_input.setCurrentIndex(state.get("packing_type", DEFAULTS["packing_type"]))
+        self._frame_step_input.setValue(state.get("frame_step", self.DEFAULTS["frame_step"]))
+        self._packing_type_input.setCurrentIndex(state.get("packing_type", self.DEFAULTS["packing_type"]))
 
-        columns, rows = state.get("grid_size", DEFAULTS["grid_size"])
+        columns, rows = state.get("grid_size", self.DEFAULTS["grid_size"])
         self._grid_columns_input.setValue(columns)
         self._grid_rows_input.setValue(rows)
 
-        self._grid_size_auto_update_checkbox.setChecked(state.get("grid_size_auto_update", DEFAULTS["grid_size_auto_update"]))
-        self._is_export_kra_input.setChecked(state.get("is_export_kra", DEFAULTS["is_export_kra"]))
-        self._is_export_image_input.setChecked(state.get("is_export_image", DEFAULTS["is_export_image"]))
+        self._grid_size_auto_update_checkbox.setChecked(state.get("grid_size_auto_update", self.DEFAULTS["grid_size_auto_update"]))
+        self._is_export_kra_input.setChecked(state.get("is_export_kra", self.DEFAULTS["is_export_kra"]))
+        self._is_export_image_input.setChecked(state.get("is_export_image", self.DEFAULTS["is_export_image"]))
 
         self.refresh_ui()
 
     def _save_state(self):
         data: dict[str, any] = self._get_state()
-        Serializer.save_state(self._document, WIDGET_KEY, data, WIDGET_DESCRIPTION)
+        Serializer.save_state(self._document, self.WIDGET_KEY, data, self.WIDGET_DESCRIPTION)
     
     def _get_state(self) -> dict[str, any]:
         return {
