@@ -1,7 +1,22 @@
 from krita import Krita
 from PyQt5.QtCore import Qt, QSize, pyqtSignal, QTimer
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QMessageBox, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton
+
+#region messages
+
+class ActiveDocumentWarningMessage(QMessageBox):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.setIcon(QMessageBox.Warning)
+        self.setText("No Active Document Found!")
+        self.setInformativeText("You need to have a document open to use the Spritesheet Manager tools!")
+        self.setWindowTitle("Spritesheet Manager")
+        self.setStandardButtons(QMessageBox.Ok)
+        self.exec_()
+
+#endregion
 
 class PreviewWindow(QWidget):
     def __init__(
@@ -107,6 +122,8 @@ class PreviewWindow(QWidget):
             self._timer.stop()
             self._refresh()
 
+#region buttons
+
 class LinkButton(QToolButton):
     link_changed = pyqtSignal(bool)
 
@@ -137,3 +154,5 @@ class LinkButton(QToolButton):
 
     def _on_button_clicked(self):
         self.set_link(not self._is_linked)
+
+#endregion

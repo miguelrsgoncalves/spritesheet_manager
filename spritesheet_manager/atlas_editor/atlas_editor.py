@@ -1,5 +1,6 @@
 from krita import Krita
 from PyQt5.QtWidgets import QMainWindow, QAction, QMessageBox
+from ..core.widgets import ActiveDocumentWarningMessage
 
 def create_spritesheet_editor_actions(plugin_instance, window, menu):
     main_window: QMainWindow = window.qwindow()
@@ -22,18 +23,12 @@ def run_animation_exporter_dialog(main_window):
     if not has_active_document(): return
     AnimationExporterDialog(main_window)
 
-def has_active_document() -> bool:
+def has_active_document(main_window) -> bool:
     document = Krita.instance().activeDocument()
     if document is not None: return True
-    
-    warning_message: QMessageBox = QMessageBox()
-    warning_message.setIcon(QMessageBox.Warning)
-    warning_message.setText("No Active Document Found!")
-    warning_message.setInformativeText("You need to have a document open to use the Spritesheet Manager tools!")
-    warning_message.setWindowTitle("Spritesheet Manager")
-    warning_message.setStandardButtons(QMessageBox.Ok)
-    warning_message.exec_()
-    
+
+    ActiveDocumentWarningMessage(main_window)
+
     return False
 
 
