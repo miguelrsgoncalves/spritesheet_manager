@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
 from ...core.serializer import Serializer
 
-class AtlasEditorWidget:
+class AtlasEditorWidget(QWidget):
     WIDGET_KEY: str = "ATLAS_EDITOR"
     
     def __init__(self, parent, document):
@@ -33,9 +33,11 @@ class AtlasEditorDocker(DockWidget):
         super().__init__()
         
         self.setWindowTitle("Atlas Editor")
+
+        document = Krita.instance().activeDocument()
         
-        self._widget: AtlasEditorWidget = AtlasEditorWidget(self)
-        self.setWidget(self._widget)
+        self._atlas_editor_widget: AtlasEditorWidget = AtlasEditorWidget(self, document)
+        self.setWidget(self._atlas_editor_widget)
 
     def canvasChanged(self, canvas):
-        self._widget.refresh_ui()
+        self._atlas_editor_widget.refresh_ui()

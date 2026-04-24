@@ -6,14 +6,12 @@ from .widgets.atlas_editor_widget import AtlasEditorDocker
 def create_atlas_editor_actions(plugin_instance, window, menu):
     main_window: QMainWindow = window.qwindow()
 
-    setup_dockers()
-
     atlas_editor_docker_action: QAction = QAction("Open Docker", main_window)
     atlas_editor_docker_action.triggered.connect(lambda: run_atlas_editor_docker(main_window))
     atlas_editor_docker_action.setToolTip("Open Atlas Editor docker.")
     menu.addAction(atlas_editor_docker_action)
 
-def setup_dockers():
+def setup_atlas_editor_dockers_factory():
     atlas_editor_docker_factory = DockWidgetFactory(
         AtlasEditorDocker.DOCKER_KEY,
         DockWidgetFactoryBase.DockRight,
@@ -22,9 +20,13 @@ def setup_dockers():
     
     Krita.instance().addDockWidgetFactory(atlas_editor_docker_factory)
 
-def run_atlas_editor_docker(main_window):    
-    dockers = main_window.dockers()
-    for docker in dockers:
+def run_atlas_editor_docker(main_window):
+    if not has_active_document(main_window): return
+    
+    window = Krita.instance().activeWindow()
+    if not window: return
+
+    for docker in window.dockers():
         if docker.objectName() == AtlasEditorDocker.DOCKER_KEY:
             docker.setVisible(True)
             docker.raise_()
