@@ -1,6 +1,6 @@
 import os
 from krita import Krita
-from PyQt5.QtWidgets import QMainWindow, QAction, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QAction
 from ..core.widgets import ActiveDocumentWarningMessage
 from .widgets.padder_widget import PadderDialog
 from .widgets.animation_exporter_widget import AnimationExporterDialog
