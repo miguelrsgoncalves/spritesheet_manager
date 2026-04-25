@@ -38,7 +38,7 @@ class AnimationExporterWidget(QWidget):
 
         self.setLayout(layout)
 
-        self._load_state()
+        self.load_state()
 
         self.refresh_ui()
     
@@ -184,7 +184,7 @@ class AnimationExporterWidget(QWidget):
 
     #region state
 
-    def _load_state(self):
+    def load_state(self):
         state: dict[str, any] = Serializer.load_state(self._document, self.WIDGET_KEY)
         self._set_state(state)
     
@@ -204,7 +204,7 @@ class AnimationExporterWidget(QWidget):
 
         self.refresh_ui()
 
-    def _save_state(self):
+    def save_state(self):
         data: dict[str, any] = self._get_state()
         Serializer.save_state(self._document, self.WIDGET_KEY, data, self.WIDGET_DESCRIPTION)
     
@@ -299,6 +299,6 @@ class AnimationExporterDialog(QDialog):
 
         if self.exec_() != QDialog.Accepted: return None
 
-        animation_exporter_widget._save_state()
+        animation_exporter_widget.save_state()
 
         animation_exporter_widget.run_animation_exporter()
