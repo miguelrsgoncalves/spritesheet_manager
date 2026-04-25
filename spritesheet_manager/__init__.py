@@ -1,4 +1,4 @@
 from krita import Krita
-from .spritesheet_manager import SpritesheetManagerExtension
+from .spritesheet_manager import SpritesheetManager
 
-Krita.instance().addExtension(SpritesheetManagerExtension(Krita.instance()))
+Krita.instance().addExtension(SpritesheetManager(Krita.instance()))
