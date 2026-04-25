@@ -39,7 +39,7 @@ class PadderWidget(QWidget):
 
         self.setLayout(layout)
 
-        self._load_state()
+        self.load_state()
 
         self.refresh_ui()
 
@@ -233,7 +233,7 @@ class PadderWidget(QWidget):
 
     #region state
 
-    def _load_state(self):
+    def load_state(self):
         state: dict[str, any] = Serializer.load_state(self._document, self.WIDGET_KEY)
         self._set_state(state)
     
@@ -256,7 +256,7 @@ class PadderWidget(QWidget):
 
         self.refresh_ui()
 
-    def _save_state(self):
+    def save_state(self):
         data: dict[str, any] = self._get_state()
         Serializer.save_state(self._document, self.WIDGET_KEY, data, self.WIDGET_DESCRIPTION)
     
@@ -376,6 +376,6 @@ class PadderDialog(QDialog):
 
         if self.exec_() != QDialog.Accepted: return None
 
-        padder_widget._save_state()
+        padder_widget.save_state()
 
         padder_widget.run_padder()
