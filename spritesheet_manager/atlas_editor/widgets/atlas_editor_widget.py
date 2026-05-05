@@ -23,7 +23,7 @@ class AtlasEditorWidget(QWidget):
 
         self.setLayout(layout)
 
-        self._load_state()
+        self.load_state()
 
         self.refresh_ui()
 
@@ -92,4 +92,4 @@ class AtlasEditorDocker(DockWidget):
 
     def canvasChanged(self, canvas):
         self._atlas_editor_widget._document = Krita.instance().activeDocument()
-        self._atlas_editor_widget._load_state()
+        self._atlas_editor_widget.load_state()

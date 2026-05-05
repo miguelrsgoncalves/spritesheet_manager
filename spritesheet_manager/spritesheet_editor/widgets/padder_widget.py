@@ -70,7 +70,11 @@ class PadderWidget(QWidget):
     def _refresh_preview(self):
         padder_arguments: dict[str, any] = self._get_padder_arguments()
         exporter: Padder = Padder(**padder_arguments)
-        preview_image, preview_arguments = exporter.run(True, [self._preview_window.window_size[0], self._preview_window.window_size[1]])
+        preview_image, preview_arguments = exporter.run(
+            True,
+            [self._preview_window.window_size[0], self._preview_window.window_size[1]],
+            self._preview_window.quality_scale
+        )
         return (preview_image, preview_arguments) if preview_image else (None, {})
     
     def _get_default_padded_export_name(self) -> str:
