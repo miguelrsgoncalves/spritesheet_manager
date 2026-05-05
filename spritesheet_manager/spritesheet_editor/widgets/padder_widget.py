@@ -73,7 +73,7 @@ class PadderWidget(QWidget):
         preview_image, preview_arguments = exporter.run(
             True,
             [self._preview_window.window_size[0], self._preview_window.window_size[1]],
-            self._preview_window.quality_scale
+            self._preview_window.quality_scale,
         )
         return (preview_image, preview_arguments) if preview_image else (None, {})
     

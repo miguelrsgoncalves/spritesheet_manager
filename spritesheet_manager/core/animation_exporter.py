@@ -3,8 +3,6 @@ from krita import Krita, InfoObject
 from PyQt5.QtGui import QImage
 from enum import Enum
 
-PREVIEW_RESOLUTION_SCALING = 0.35
-
 class AnimationExporter:
     class PackingType(Enum):
         HORIZONTAL = 1
@@ -36,7 +34,7 @@ class AnimationExporter:
         self._is_export_kra = is_export_kra
         self._is_export_image = is_export_image
 
-    def run(self, is_preview: bool = False, preview_size: list[int] = []):
+    def run(self, is_preview: bool = False, preview_size: list[int] = [], quality_scale: int = 30):
         krita = Krita.instance()
 
         #region preview_scaling
@@ -44,9 +42,10 @@ class AnimationExporter:
         if is_preview:
             self._document = self._document.clone()
             
+            scale_factor: float = quality_scale / 100.0
             self._document.scaleImage(
-                int(self._document.width() * PREVIEW_RESOLUTION_SCALING), 
-                int(self._document.height() * PREVIEW_RESOLUTION_SCALING), 
+                int(self._document.width() * scale_factor), 
+                int(self._document.height() * scale_factor), 
                 16, 16,
                 "Box"
             )
