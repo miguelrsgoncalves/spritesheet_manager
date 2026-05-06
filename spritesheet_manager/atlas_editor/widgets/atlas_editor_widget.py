@@ -19,7 +19,7 @@ class AtlasEditorWidget(QWidget):
 
         layout: QVBoxLayout = QVBoxLayout()
 
-        layout.addWidget(self._build_options_group)
+        layout.addWidget(self._build_options_group())
 
         self.setLayout(layout)
 
