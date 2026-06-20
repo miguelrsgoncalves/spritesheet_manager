@@ -1,49 +1,41 @@
-from krita import Krita
-from PyQt5.QtWidgets import QMainWindow, QAction, QMessageBox
-from .models.atlas_model import AtlasModel
-from .states.atlas_state import load_atlas_state, save_atlas_state
+from krita import Krita, DockWidgetFactory, DockWidgetFactoryBase
+from PyQt5.QtWidgets import QMainWindow, QAction
+from ..core.widgets import ActiveDocumentWarningMessage
+from .widgets.atlas_editor_widget import AtlasEditorDocker
 
-class AtlasEditor:
+def create_atlas_editor_actions(plugin_instance, window, menu):
+    main_window: QMainWindow = window.qwindow()
 
-    def __init__(self):
-        self._model = AtlasModel()
+    atlas_editor_docker_action: QAction = QAction("Open Docker", main_window)
+    atlas_editor_docker_action.triggered.connect(lambda: run_atlas_editor_docker(main_window))
+    atlas_editor_docker_action.setToolTip("Open Atlas Editor docker.")
+    menu.addAction(atlas_editor_docker_action)
 
-    def get_model(self):
-        return self._model
+def setup_atlas_editor_dockers_factory():
+    atlas_editor_docker_factory = DockWidgetFactory(
+        AtlasEditorDocker.DOCKER_KEY,
+        DockWidgetFactoryBase.DockRight,
+        AtlasEditorDocker
+    )
+    
+    Krita.instance().addDockWidgetFactory(atlas_editor_docker_factory)
 
-    def load_from_document(self, doc):
-        state = load_atlas_state(doc)
-        if state:
-            self._model = AtlasModel.from_dict(state)
-        else:
-            self._model = AtlasModel()
+def run_atlas_editor_docker(main_window):
+    if not has_active_document(main_window): return
+    
+    window = Krita.instance().activeWindow()
+    if not window: return
 
-    def save_to_document(self, doc):
-        if doc:
-            save_atlas_state(doc, self._model.to_dict())
+    for docker in window.dockers():
+        if docker.objectName() == AtlasEditorDocker.DOCKER_KEY:
+            docker.setVisible(True)
+            docker.raise_()
+            return
 
-    def add_grid(self, doc):
-        grid = self._model.add_grid()
-        self.save_to_document(doc)
-        return grid
-
-    def remove_grid(self, index, doc):
-        self._model.remove_grid(index)
-        self.save_to_document(doc)
-
-    def on_grid_changed(self, doc):
-        self.save_to_document(doc)
-
-def has_active_document() -> bool:
+def has_active_document(main_window) -> bool:
     document = Krita.instance().activeDocument()
     if document is not None: return True
-    
-    warning_message: QMessageBox = QMessageBox()
-    warning_message.setIcon(QMessageBox.Warning)
-    warning_message.setText("No Active Document Found!")
-    warning_message.setInformativeText("You need to have a document open to use the Spritesheet Manager tools!")
-    warning_message.setWindowTitle("Spritesheet Manager")
-    warning_message.setStandardButtons(QMessageBox.Ok)
-    warning_message.exec_()
-    
+
+    ActiveDocumentWarningMessage(main_window)
+
     return False
