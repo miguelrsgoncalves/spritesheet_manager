@@ -18,8 +18,8 @@ class SpritesheetManager(Extension):
         main_window.menuBar().addMenu(spritesheet_manager_menu)
 
         # Atlas Editor submenu
-        atlas_editor_submenu: QMenu = spritesheet_manager_menu.addMenu("Atlas Editor")
-        create_atlas_editor_actions(self, window, atlas_editor_submenu)
+        # atlas_editor_submenu: QMenu = spritesheet_manager_menu.addMenu("Atlas Editor")
+        # create_atlas_editor_actions(self, window, atlas_editor_submenu)
 
         # Spritesheet Editor submenu
         spritesheet_editor_submenu: QMenu = spritesheet_manager_menu.addMenu("Spritesheet Editor")
