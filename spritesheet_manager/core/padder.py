@@ -10,9 +10,9 @@ class Padder():
     def __init__(
             self,
             document,
-            tile_size: list[int, int],
-            grid_size: list[int, int],
-            padding_size: list[int, int],
+            tile_size: tuple[int, int],
+            grid_size: tuple[int, int],
+            padding_size: tuple[int, int],
             is_anti_bleed: bool,
             export_name: str,
             is_export_kra: bool,
@@ -36,12 +36,16 @@ class Padder():
             self._document = self._document.clone()
             
             scale_factor: float = quality_scale / 100.0
+            preview_width = max(1, int(self._document.width() * scale_factor))
+            preview_height = max(1, int(self._document.height() * scale_factor))
+            resolution = int(self._document.resolution())
             self._document.scaleImage(
-                int(self._document.width() * scale_factor), 
-                int(self._document.height() * scale_factor), 
-                16, 16,
+                preview_width,
+                preview_height,
+                resolution, resolution,
                 "Box"
             )
+            self._document.waitForDone()
             
             self._tile_size = [max(1, int(x * scale_factor)) for x in self._tile_size]
             self._padding_size = [int(x * scale_factor) for x in self._padding_size]
@@ -97,6 +101,9 @@ class Padder():
                     )
 
         padded_document.refreshProjection()
+        padded_document.waitForDone()
+
+        #region preview_render
 
         if is_preview:
             preview_image: QImage = padded_document.thumbnail(preview_size[0], preview_size[1])
@@ -108,8 +115,11 @@ class Padder():
                 ],
             }
 
+            self._document.close()
             padded_document.close()
             return preview_image, preview_arguments
+        
+        #endregion
         
         #region export
 

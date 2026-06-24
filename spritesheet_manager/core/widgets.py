@@ -16,12 +16,12 @@ class ActiveDocumentWarningMessage(QMessageBox):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setIcon(QMessageBox.Warning)
+        self.setIcon(QMessageBox.Icon.Warning)
         self.setText("No Active Document Found!")
         self.setInformativeText("You need to have a document open to use the Spritesheet Manager tools!")
         self.setWindowTitle("Spritesheet Manager")
-        self.setStandardButtons(QMessageBox.Ok)
-        self.exec_()
+        self.setStandardButtons(QMessageBox.StandardButton.Ok)
+        self.exec()
 
 #endregion
 
@@ -74,10 +74,9 @@ class PreviewWindow(QWidget):
 
         for snake_name, value in self.RENDER_QUALITY.items():
             ui_name: str = self._format_ui_label(snake_name)
-            self._render_quality_menu.addAction(
-                ui_name, 
-                lambda v = value, n = snake_name: self.set_quality(v, n)
-            )
+            action = QAction(ui_name, self)
+            action.triggered.connect(lambda checked = False, v = value, n = snake_name: self.set_quality(v, n))
+            self._render_quality_menu.addAction(action)
         
         self._render_quality_menu.addSeparator()
 
@@ -87,7 +86,7 @@ class PreviewWindow(QWidget):
         slider_layout.setContentsMargins(10, 4, 10, 4)
 
         custom_label: QLabel = QLabel("Custom:")
-        self._render_quality_slider: QSlider = QSlider(Qt.Horizontal)
+        self._render_quality_slider: QSlider = QSlider(Qt.Orientation.Horizontal)
         self._render_quality_slider.setRange(1, 100)
         self._render_quality_slider.setValue(self.quality_scale)
         self._render_quality_slider.setMinimumWidth(100)
@@ -115,8 +114,8 @@ class PreviewWindow(QWidget):
         self._window.setMinimumSize(self.window_size[0], self.window_size[1])
         self._window.setMaximumSize(self.window_size[2], self.window_size[3])
         self._window.setSizePolicy(
-            self._window.sizePolicy().Expanding,
-            self._window.sizePolicy().Expanding
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
         )
         self._window.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._window.setStyleSheet("""
@@ -186,7 +185,6 @@ class PreviewWindow(QWidget):
         self.set_quality(value)
 
     def _format_ui_label(self, name: str) -> str:
-        """Converts internal snake_case keys to UI-friendly Title Case."""
         return name.replace("_", " ").title()
 
     def _on_timer_tick(self):
@@ -204,7 +202,7 @@ class PreviewWindow(QWidget):
 class LinkButton(QToolButton):
     link_changed = pyqtSignal(bool)
 
-    def __init__(self):        
+    def __init__(self):
         super().__init__()
 
         self.setIconSize(QSize(8, 24))

@@ -370,22 +370,22 @@ class PadderDialog(QDialog):
         layout: QVBoxLayout = QVBoxLayout()
 
         document = Krita.instance().activeDocument()
-        padder_widget: PadderWidget = PadderWidget(self, document)
+        self.padder_widget: PadderWidget = PadderWidget(self, document)
 
-        layout.addWidget(padder_widget)
+        layout.addWidget(self.padder_widget)
 
         layout.addStretch(1)
 
-        buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
-        buttons.button(QDialogButtonBox.Ok).setText("Apply Padding")
+        buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Apply Padding")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
         self.setLayout(layout)
+    
+    def execute(self):
+        if self.exec() != QDialog.DialogCode.Accepted: return None
 
-        if self.exec_() != QDialog.Accepted: return None
-
-        padder_widget.save_state()
-
-        padder_widget.run_padder()
+        self.padder_widget.save_state()
+        self.padder_widget.run_padder()

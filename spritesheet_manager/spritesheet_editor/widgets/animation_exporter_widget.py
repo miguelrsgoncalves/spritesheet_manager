@@ -10,7 +10,6 @@ except ImportError:
 
 from ...core.serializer import Serializer
 from ...core.animation_exporter import AnimationExporter
-import math
 from ...core.widgets import PreviewWindow
 
 MAX_INT: int = 2147483647
@@ -294,22 +293,22 @@ class AnimationExporterDialog(QDialog):
         layout: QVBoxLayout = QVBoxLayout()
 
         document = Krita.instance().activeDocument()
-        animation_exporter_widget: AnimationExporterWidget = AnimationExporterWidget(self, document)
+        self.animation_exporter_widget: AnimationExporterWidget = AnimationExporterWidget(self, document)
 
-        layout.addWidget(animation_exporter_widget)
+        layout.addWidget(self.animation_exporter_widget)
 
         layout.addStretch(1)
 
-        buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
-        buttons.button(QDialogButtonBox.Ok).setText("Export Animation")
+        buttons: QDialogButtonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Ok)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Export Animation")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
         self.setLayout(layout)
+    
+    def execute(self):
+        if self.exec() != QDialog.DialogCode.Accepted: return None
 
-        if self.exec_() != QDialog.Accepted: return None
-
-        animation_exporter_widget.save_state()
-
-        animation_exporter_widget.run_animation_exporter()
+        self.animation_exporter_widget.save_state()
+        self.animation_exporter_widget.run_animation_exporter()

@@ -47,12 +47,16 @@ class AnimationExporter:
             self._document = self._document.clone()
             
             scale_factor: float = quality_scale / 100.0
+            preview_width = max(1, int(self._document.width() * scale_factor))
+            preview_height = max(1, int(self._document.height() * scale_factor))
+            resolution = int(self._document.resolution())
             self._document.scaleImage(
-                int(self._document.width() * scale_factor), 
-                int(self._document.height() * scale_factor), 
-                16, 16,
+                preview_width,
+                preview_height,
+                resolution, resolution,
                 "Box"
             )
+            self._document.waitForDone()
 
         #endregion
 
@@ -103,8 +107,11 @@ class AnimationExporter:
             animation_layer.setPixelData(pixel_data, destination_x, destination_y, frame_width, frame_height)
 
         animation_document.refreshProjection()
+        animation_document.waitForDone()
         self._document.setBatchmode(False)
         animation_document.setBatchmode(False)
+
+        #region preview_render
 
         if is_preview:
             preview_image: QImage = animation_document.thumbnail(preview_size[0], preview_size[1])
@@ -116,8 +123,11 @@ class AnimationExporter:
                 ],
             }
 
+            self._document.close()
             animation_document.close()
             return preview_image, preview_arguments
+        
+        #endregion
         
         #region export
 
