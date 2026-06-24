@@ -13,7 +13,7 @@ def create_atlas_editor_actions(plugin_instance, window, menu):
     main_window: QMainWindow = window.qwindow()
 
     atlas_editor_docker_action: QAction = QAction("Open Docker", main_window)
-    atlas_editor_docker_action.triggered.connect(lambda: run_atlas_editor_docker(main_window))
+    atlas_editor_docker_action.triggered.connect(run_atlas_editor_docker)
     atlas_editor_docker_action.setToolTip("Open Atlas Editor docker.")
     menu.addAction(atlas_editor_docker_action)
 
@@ -26,7 +26,8 @@ def setup_atlas_editor_dockers_factory():
     
     Krita.instance().addDockWidgetFactory(atlas_editor_docker_factory)
 
-def run_atlas_editor_docker(main_window):
+def run_atlas_editor_docker():
+    main_window = Krita.instance().activeWindow().qwindow()
     if not has_active_document(main_window): return
     
     window = Krita.instance().activeWindow()

@@ -15,22 +15,28 @@ def create_spritesheet_editor_actions(plugin_instance, window, menu):
     main_window: QMainWindow = window.qwindow()
 
     padder_action: QAction = QAction("Padder", main_window)
-    padder_action.triggered.connect(lambda: run_padder_dialog(main_window))
+    padder_action.triggered.connect(run_padder_dialog)
     padder_action.setToolTip("Add padding to a spritesheet.")
     menu.addAction(padder_action)
 
     animation_exporter_action: QAction = QAction("Animation Exporter", main_window)
-    animation_exporter_action.triggered.connect(lambda: run_animation_exporter_dialog(main_window))
+    animation_exporter_action.triggered.connect(run_animation_exporter_dialog)
     animation_exporter_action.setToolTip("Export an animation as a spritesheet.")
     menu.addAction(animation_exporter_action)
 
-def run_padder_dialog(main_window):
+def run_padder_dialog():
+    main_window = Krita.instance().activeWindow().qwindow()
     if not has_active_document(main_window): return
-    PadderDialog(main_window)
+    
+    dialog: PadderDialog = PadderDialog(main_window)
+    dialog.execute()
 
-def run_animation_exporter_dialog(main_window):
+def run_animation_exporter_dialog():
+    main_window = Krita.instance().activeWindow().qwindow()
     if not has_active_document(main_window): return
-    AnimationExporterDialog(main_window)
+    
+    dialog: AnimationExporterDialog = AnimationExporterDialog(main_window)
+    dialog.execute()
 
 def has_active_document(main_window) -> bool:
     document = Krita.instance().activeDocument()
