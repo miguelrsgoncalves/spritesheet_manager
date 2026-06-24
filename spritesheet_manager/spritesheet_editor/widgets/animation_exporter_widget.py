@@ -1,6 +1,13 @@
 from krita import Krita
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QComboBox
+import math
+
+try:
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QComboBox
+except ImportError:
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox, QComboBox
+
 from ...core.serializer import Serializer
 from ...core.animation_exporter import AnimationExporter
 import math

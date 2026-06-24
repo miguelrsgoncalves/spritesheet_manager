@@ -1,6 +1,10 @@
 import os
 from krita import Krita, InfoObject
-from PyQt5.QtGui import QImage
+
+try:
+    from PyQt6.QtGui import QImage
+except ImportError:
+    from PyQt5.QtGui import QImage
 
 class Padder():
     def __init__(

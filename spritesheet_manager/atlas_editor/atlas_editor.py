@@ -1,5 +1,11 @@
 from krita import Krita, DockWidgetFactory, DockWidgetFactoryBase
-from PyQt5.QtWidgets import QMainWindow, QAction
+
+try:
+    from PyQt6.QtWidgets import QMainWindow
+    from PyQt6.QtGui import QAction
+except ImportError:
+    from PyQt5.QtWidgets import QMainWindow, QAction
+
 from ..core.widgets import ActiveDocumentWarningMessage
 from .widgets.atlas_editor_widget import AtlasEditorDocker
 

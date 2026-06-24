@@ -1,7 +1,12 @@
 from krita import Krita
-from PyQt5.QtCore import QByteArray
-from ..version import PLUGIN_VERSION
 import json
+
+try:
+    from PyQt6.QtCore import QByteArray
+except ImportError:
+    from PyQt5.QtCore import QByteArray
+
+from ..version import PLUGIN_VERSION
 
 PLUGIN_KEY: str = "SPRITESHEET_MANAGER"
 WIDGET_DESCRIPTION_PREFIX: str ="Spritesheet Manager: "

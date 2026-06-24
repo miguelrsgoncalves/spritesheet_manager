@@ -1,6 +1,11 @@
 from krita import Krita, Extension, DockWidgetFactory, DockWidgetFactoryBase
-from PyQt5.QtWidgets import QMainWindow, QMenu
-from .atlas_editor.atlas_editor import create_atlas_editor_actions, setup_atlas_editor_dockers_factory
+
+try:
+    from PyQt6.QtWidgets import QMainWindow, QMenu
+except ImportError:
+    from PyQt5.QtWidgets import QMainWindow, QMenu
+
+# from .atlas_editor.atlas_editor import create_atlas_editor_actions, setup_atlas_editor_dockers_factory
 from .spritesheet_editor.spritesheet_editor import create_spritesheet_editor_actions
 
 class SpritesheetManager(Extension):

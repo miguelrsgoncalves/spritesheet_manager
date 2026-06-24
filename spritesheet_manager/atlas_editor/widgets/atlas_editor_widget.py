@@ -1,6 +1,11 @@
 from krita import Krita, DockWidget
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
+
+try:
+    from PyQt6.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
+except ImportError:
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QWidget, QDialog, QGroupBox, QGridLayout, QHBoxLayout, QVBoxLayout, QLabel, QSpinBox, QCheckBox, QLineEdit, QDialogButtonBox
+
 from ...core.serializer import Serializer
 
 MAX_INT: int = 2147483647

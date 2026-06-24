@@ -1,7 +1,14 @@
 from krita import Krita
-from PyQt5.QtCore import Qt, QSize, pyqtSignal, QTimer
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMessageBox, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton, QMenu, QWidgetAction, QSlider
+
+try:
+    from PyQt6.QtCore import Qt, QSize, pyqtSignal, QTimer
+    from PyQt6.QtGui import QPixmap, QImage, QAction
+    from PyQt6.QtWidgets import QMessageBox, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton, QMenu, QWidgetAction, QSlider, QSizePolicy
+except ImportError:
+    from PyQt5.QtCore import Qt, QSize, pyqtSignal, QTimer
+    from PyQt5.QtGui import QPixmap, QImage
+    from PyQt5.QtWidgets import QMessageBox, QToolButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QPushButton, QMenu, QWidgetAction, QSlider, QSizePolicy, QAction
+
 
 #region messages
 

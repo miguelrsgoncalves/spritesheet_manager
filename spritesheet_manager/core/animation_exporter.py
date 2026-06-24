@@ -1,7 +1,11 @@
 import os
 from krita import Krita, InfoObject
-from PyQt5.QtGui import QImage
 from enum import Enum
+
+try:
+    from PyQt6.QtGui import QImage
+except ImportError:
+    from PyQt5.QtGui import QImage
 
 class AnimationExporter:
     class PackingType(Enum):
