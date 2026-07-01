@@ -68,8 +68,16 @@ class PreviewWindow(QWidget):
         self._auto_update_preview_checkbox.setChecked(True)
         self._auto_update_preview_checkbox.toggled.connect(self.request_refresh)
 
+        _render_quality_layout: QHBoxLayout = QHBoxLayout()
+
         initial_label: str = self._format_ui_label(self.DEFAULT_QUALITY_KEY)
-        self._render_quality_button: QPushButton = QPushButton(f"Quality: {initial_label}")
+        self._render_quality_label: QLabel = QLabel("Preview Quality:")
+        self._render_quality_label.setToolTip("The preview image quality can be changed:\n\nLow Quality: During quick testing for fast rendering.\nHight Quality: During final steps to verify exporting image.")
+        self._render_quality_button: QPushButton = QPushButton(f"{initial_label}")
+
+        _render_quality_layout.addWidget(self._render_quality_label)
+        _render_quality_layout.addWidget(self._render_quality_button)
+
         self._render_quality_menu: QMenu = QMenu(self)
 
         for snake_name, value in self.RENDER_QUALITY.items():
@@ -93,7 +101,6 @@ class PreviewWindow(QWidget):
         self._render_quality_slider.valueChanged.connect(self._on_slider_changed)
         
         self._render_slider_value_label: QLabel = QLabel(f"{self.quality_scale}%")
-        self._render_slider_value_label.setMinimumWidth(35)
 
         slider_layout.addWidget(custom_label)
         slider_layout.addWidget(self._render_quality_slider)
@@ -107,7 +114,7 @@ class PreviewWindow(QWidget):
         self._manual_update_button.clicked.connect(self.force_refresh)
 
         controls_layout.addWidget(self._auto_update_preview_checkbox)
-        controls_layout.addWidget(self._render_quality_button)
+        controls_layout.addLayout(_render_quality_layout)
         controls_layout.addWidget(self._manual_update_button)
         
         self._window: QLabel = QLabel()
@@ -127,7 +134,6 @@ class PreviewWindow(QWidget):
 
         self._export_size_label: QLabel = QLabel()
         self._export_size_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._export_size_label.setToolTip("The preview image is scaled down for faster rendering.")
 
         layout.addLayout(controls_layout)
         layout.addWidget(self._window)
@@ -177,7 +183,7 @@ class PreviewWindow(QWidget):
             snake_name = next((k for k, v in self.RENDER_QUALITY.items() if v == value), "custom")
         
         ui_label: str = self._format_ui_label(snake_name)
-        self._render_quality_button.setText(f"Quality: {ui_label}")
+        self._render_quality_button.setText(f"{ui_label}")
 
         self.request_refresh()
 
